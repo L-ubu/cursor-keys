@@ -4,9 +4,9 @@ import { runCommand } from "../src/commands.mjs";
 import { bold, cyan, dim, reset } from "../src/ansi.mjs";
 
 const BANNER = `
- ${cyan}╔═╗┬ ┬┌─┐┬─┐┌─┐  ┬┌─┐┬ ┬┌─┐┬─┐┌─┐
- ${cyan}│  │ ││ │├┬┘├┤   │├─┤└┬┘├┤ ├┬┘└─┐
- ${cyan}└─┘└─┘└─┘┴└─└─┘  ┴┴ ┴ └ └─┘┴└─└─┘${dim}  per-project Cursor API keys
+ ${cyan}╔═╗┬ ┬┬─┐┌─┐┌─┐┬─┐  ┬┌─┌─┐┬ ┬┌─┐
+ ${cyan}│  │ │├┬┘└─┐│ │├┬┘  ├┴┐├┤ └┬┘└─┐
+ ${cyan}└─┘└─┘┴└─└─┘└─┘┴└─  ┴ ┴└─┘ ┴ └─┘${dim}  per-project Cursor API keys
 `;
 
 function printHelp() {
