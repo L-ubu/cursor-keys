@@ -1,0 +1,30 @@
+{
+  "name": "cursor-keys",
+  "displayName": "cursor-keys",
+  "description": "Shows which cursor-keys profile (API key context) this window uses, and warns when a folder is opened in the wrong profile.",
+  "version": "1.0.0",
+  "publisher": "lubu",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cursor-keys.openProject",
+        "title": "cursor-keys: Open Project..."
+      },
+      {
+        "command": "cursor-keys.relaunchHere",
+        "title": "cursor-keys: Relaunch This Folder in Its Project Profile"
+      }
+    ]
+  }
+}

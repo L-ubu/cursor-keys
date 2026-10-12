@@ -1,0 +1,37 @@
+{
+  "name": "cursor-keys",
+  "version": "1.0.0",
+  "description": "Per-project Cursor profiles so each window uses the correct BYOK API key. Zero dependencies.",
+  "type": "module",
+  "bin": {
+    "cursor-keys": "bin/cursor-keys.mjs",
+    "ckeys": "bin/cursor-keys.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "src",
+    "extension"
+  ],
+  "keywords": [
+    "cursor",
+    "cli",
+    "api-key",
+    "bonzai",
+    "byok",
+    "developer-tools",
+    "productivity"
+  ],
+  "license": "MIT",
+  "author": "L-ubu (https://github.com/L-ubu)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/L-ubu/cursor-keys.git"
+  },
+  "scripts": {
+    "test": "node --test",
+    "prepublishOnly": "npm test"
+  }
+}
