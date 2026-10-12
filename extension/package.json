@@ -5,6 +5,11 @@
   "version": "1.0.0",
   "publisher": "lubu",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/L-ubu/cursor-keys",
+    "directory": "extension"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
