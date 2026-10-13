@@ -183,6 +183,28 @@ export function stateDbValueContains(stateDbPath, urlFragment) {
   }
 }
 
+/**
+ * True if the value for `key` is byte-identical in both state DBs.
+ * Comparison happens inside SQL; the value never enters this process.
+ * @param {string} dbA
+ * @param {string} dbB
+ * @param {string} key
+ */
+export function stateDbValuesMatch(dbA, dbB, key) {
+  if (!fs.existsSync(dbA) || !fs.existsSync(dbB) || !hasSqlite3()) {
+    return false;
+  }
+  try {
+    const out = execSync(
+      `sqlite3 ${shellQuote(dbA)} "ATTACH DATABASE ${shellQuote(dbB)} AS other; SELECT CASE WHEN (SELECT value FROM ItemTable WHERE key = ${shellQuote(key)}) IS NOT NULL AND (SELECT value FROM ItemTable WHERE key = ${shellQuote(key)}) = (SELECT value FROM other.ItemTable WHERE key = ${shellQuote(key)}) THEN 1 ELSE 0 END;"`,
+      { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] },
+    );
+    return out.trim() === "1";
+  } catch {
+    return false;
+  }
+}
+
 function shellQuote(s) {
   return `'${String(s).replace(/'/g, `'\\''`)}'`;
 }

@@ -33,8 +33,10 @@ import {
   findCursorCli,
   listRunningCursorProfiles,
   mainCursorProfileRoot,
+  mainCursorUserDir,
   stateDbHasKey,
   stateDbValueContains,
+  stateDbValuesMatch,
   hasSqlite3,
 } from "./detect.mjs";
 import {
@@ -297,6 +299,13 @@ async function cmdInit(args) {
   );
 }
 
+function shouldShowFirstRunChecklist(profileDir) {
+  if (!needsFirstRunChecklist(profileDir)) return false;
+  const db = profileStateDb(profileDir);
+  // A cloned profile already carries a key row: setup is effectively done.
+  return !(fs.existsSync(db) && stateDbHasKey(db, SECRET_OPENAI_KEY));
+}
+
 async function cmdAdd(args) {
   const { flags, positional } = parseFlags(args);
   if (flags.help) {
@@ -354,7 +363,7 @@ async function cmdAdd(args) {
   console.log(ok(`Profile ready: ${collapseHome(project.profileDir)}`));
   console.log(`  Repo:  ${collapseHome(project.path)}`);
   console.log(`  Color: ${color} ${blockSwatch(color)}`);
-  if (needsFirstRunChecklist(project.profileDir)) {
+  if (shouldShowFirstRunChecklist(project.profileDir)) {
     printFirstRunChecklist(name, config.baseUrl);
   }
 }
@@ -411,7 +420,7 @@ async function cmdOpen(args) {
   console.log(`  ${dim}${collapseHome(project.path)}${reset}`);
   console.log(`  Profile ${blockSwatch(project.color)} ${project.color}`);
 
-  if (needsFirstRunChecklist(project.profileDir)) {
+  if (shouldShowFirstRunChecklist(project.profileDir)) {
     printFirstRunChecklist(name, config.baseUrl);
     markSetupDone(project.profileDir);
   }
@@ -505,9 +514,22 @@ async function cmdDoctor(args) {
     }
     const db = profileStateDb(p.profileDir);
     if (fs.existsSync(db)) {
+      const hasKey = stateDbHasKey(db, SECRET_OPENAI_KEY);
       console.log(
-        `  ${stateDbHasKey(db, SECRET_OPENAI_KEY) ? ok("✓") : warn("✗")} OpenAI/Bonzai API key row present`,
+        `  ${hasKey ? ok("✓") : warn("✗")} OpenAI/Bonzai API key row present`,
       );
+      if (hasKey) {
+        const mainDb = path.join(
+          mainCursorUserDir(),
+          "globalStorage",
+          "state.vscdb",
+        );
+        if (stateDbValuesMatch(db, mainDb, SECRET_OPENAI_KEY)) {
+          console.log(
+            `  ${warn("!")} Key is identical to the main profile (inherited via clone); run: cursor-keys set-key ${name}`,
+          );
+        }
+      }
       console.log(
         `  ${stateDbHasKey(db, SUBAGENT_OVERRIDES_KEY) ? ok("✓") : warn("✗")} Explore subagent overrides present`,
       );
@@ -753,7 +775,19 @@ async function cmdSetKey(args) {
     throw new Error(`Close the "${name}" Cursor window first, then retry.`);
   }
 
-  const key = flags.key || (await promptHidden(`API key for ${name}: `));
+  let key = flags.key;
+  if (!key) {
+    console.log(
+      `\nPaste the API key for ${bold}${name}${reset} below, then press Enter.`,
+    );
+    console.log(
+      `${dim}Input is hidden: nothing echoes while you paste or type.${reset}`,
+    );
+    key = await promptHidden("API key: ");
+  }
+  if (!key) {
+    throw new Error("No key entered. Aborted, nothing was written.");
+  }
   const result = setProfileApiKey(db, key);
   console.log(
     ok(`Key set for ${name}`) +
