@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   expandHome,
   pickColorForName,
+  pickUnusedColor,
   validateConfig,
   findProjectByPath,
 } from "../src/config.mjs";
@@ -32,6 +33,17 @@ describe("config", () => {
 
   it("pickColorForName is stable", () => {
     assert.equal(pickColorForName("jlr_mss"), pickColorForName("jlr_mss"));
+  });
+
+  it("pickUnusedColor keeps preferred color when free", () => {
+    assert.equal(pickUnusedColor("bucx", []), pickColorForName("bucx"));
+  });
+
+  it("pickUnusedColor avoids collision", () => {
+    const taken = pickColorForName("bucx");
+    const picked = pickUnusedColor("bucx", [taken]);
+    assert.notEqual(picked, taken);
+    assert.match(picked, /^#[0-9a-fA-F]{6}$/);
   });
 
   it("findProjectByPath picks longest match", () => {

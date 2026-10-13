@@ -74,22 +74,22 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 
 ## Commands
 
-| Command | What it does |
-| ------- | ------------ |
-| `init [--root DIR] [--all]` | Discover git repos and register them |
-| `add <name> [--path] [--color] [--clone main]` | Create a project profile |
-| `clone <name> [--from main]` | Copy sign-in + settings + model config from a donor profile |
-| `set-key <name> [--key sk-...]` | Inject the project API key (encrypted, verified) |
-| `open [name]` | Launch Cursor with the profile (auto-detect from cwd) |
-| `status` | Projects, colors, running windows, key configured |
-| `current` | Mapping for the current directory |
-| `config [baseUrl [URL]]` | Show or set the gateway base URL |
-| `sync [name]` | Re-copy main Cursor settings into profiles |
-| `doctor [name]` | Health checks: key row, base URL, subagent overrides |
-| `wrap [--install]` | zsh function so plain `cursor <path>` auto-picks the profile |
-| `aliases [--install]` | Per-project shell aliases |
-| `install-extension` | Link the Cursor extension into `~/.cursor/extensions` |
-| `rm <name> [--delete]` | Unregister (optionally delete the profile) |
+| Command                                        | What it does                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| `init [--root DIR] [--all]`                    | Discover git repos and register them                         |
+| `add <name> [--path] [--color] [--clone main]` | Create a project profile                                     |
+| `clone <name> [--from main]`                   | Copy sign-in + settings + model config from a donor profile  |
+| `set-key <name> [--key sk-...]`                | Inject the project API key (encrypted, verified)             |
+| `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)        |
+| `status`                                       | Projects, colors, running windows, key configured            |
+| `current`                                      | Mapping for the current directory                            |
+| `config [baseUrl [URL]]`                       | Show or set the gateway base URL                             |
+| `sync [name]`                                  | Re-copy main Cursor settings into profiles                   |
+| `doctor [name]`                                | Health checks: key row, base URL, subagent overrides         |
+| `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile |
+| `aliases [--install]`                          | Per-project shell aliases                                    |
+| `install-extension`                            | Link the Cursor extension into `~/.cursor/extensions`        |
+| `rm <name> [--delete]`                         | Unregister (optionally delete the profile)                   |
 
 ## Config
 

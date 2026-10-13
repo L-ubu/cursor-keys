@@ -13,6 +13,7 @@ import {
   getProject,
   loadConfig,
   pickColorForName,
+  pickUnusedColor,
   saveConfig,
   profileStateDb,
 } from "./config.mjs";
@@ -241,7 +242,9 @@ async function cmdSync(args) {
     writeProfileSettings(project.profileDir, name, project.color);
     console.log(ok(`Synced settings from main -> ${name}`));
   }
-  console.log(`${dim}Open Cursor windows reload settings automatically.${reset}`);
+  console.log(
+    `${dim}Open Cursor windows reload settings automatically.${reset}`,
+  );
 }
 
 async function cmdInit(args) {
@@ -317,8 +320,13 @@ async function cmdAdd(args) {
     throw new Error(`Repo path does not exist: ${repoPath}`);
   }
 
+  const usedColors = Object.entries(config.projects)
+    .filter(([other]) => other !== name)
+    .map(([, entry]) => entry.color);
   const color =
-    flags.color || config.projects[name]?.color || pickColorForName(name);
+    flags.color ||
+    config.projects[name]?.color ||
+    pickUnusedColor(name, usedColors);
   config.projects[name] = { path: collapseHome(repoPath), color };
   saveConfig(config);
 

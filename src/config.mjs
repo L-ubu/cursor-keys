@@ -98,25 +98,34 @@ export function baseUrlFragment(config) {
   return String(config.baseUrl || "").replace(/^https?:\/\//, "");
 }
 
+const COLOR_PALETTE = [
+  "#4f8cff",
+  "#ff6b6b",
+  "#51cf66",
+  "#ffd43b",
+  "#845ef7",
+  "#20c997",
+  "#ff922b",
+  "#e64980",
+  "#339af0",
+  "#94d82d",
+];
+
 /** Deterministic palette color from project name */
 export function pickColorForName(name) {
-  const palette = [
-    "#4f8cff",
-    "#ff6b6b",
-    "#51cf66",
-    "#ffd43b",
-    "#845ef7",
-    "#20c997",
-    "#ff922b",
-    "#e64980",
-    "#339af0",
-    "#94d82d",
-  ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
   }
-  return palette[hash % palette.length];
+  return COLOR_PALETTE[hash % COLOR_PALETTE.length];
+}
+
+/** Like pickColorForName, but avoids colors already used by other projects */
+export function pickUnusedColor(name, usedColors) {
+  const used = new Set(usedColors);
+  const preferred = pickColorForName(name);
+  if (!used.has(preferred)) return preferred;
+  return COLOR_PALETTE.find((c) => !used.has(c)) || preferred;
 }
 
 /**

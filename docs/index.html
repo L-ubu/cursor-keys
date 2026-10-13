@@ -8,7 +8,10 @@
       name="description"
       content="Per-project Cursor profiles so every window automatically uses the right BYOK API key. Two windows, two projects, two keys, zero switching. Zero dependencies."
     />
-    <meta property="og:title" content="cursor-keys: per-project API keys for Cursor" />
+    <meta
+      property="og:title"
+      content="cursor-keys: per-project API keys for Cursor"
+    />
     <meta
       property="og:description"
       content="Isolated Cursor profile per project: right Bonzai/BYOK key in every window, encrypted key injection, title bar colors, wrong-window guard. Zero deps."
@@ -34,10 +37,16 @@
         --red: #f87171;
         --amber: #fbbf24;
         --cyan: #22d3ee;
-        --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-        --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+        --mono:
+          ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          "Liberation Mono", monospace;
+        --sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+          Helvetica, Arial, sans-serif;
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         background: var(--bg);
@@ -49,15 +58,37 @@
           linear-gradient(90deg, rgba(251, 191, 36, 0.03) 1px, transparent 1px);
         background-size: 40px 40px;
       }
-      .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-      nav {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 20px 0; border-bottom: 1px solid var(--line);
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 24px;
       }
-      .logo { font-family: var(--mono); font-weight: 700; color: var(--accent); text-decoration: none; }
-      .nav-links a { color: var(--muted); text-decoration: none; margin-left: 20px; font-size: 14px; }
-      .nav-links a:hover { color: var(--accent); }
-      .hero { text-align: center; padding: 56px 0 40px; }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .logo {
+        font-family: var(--mono);
+        font-weight: 700;
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        margin-left: 20px;
+        font-size: 14px;
+      }
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+      .hero {
+        text-align: center;
+        padding: 56px 0 40px;
+      }
       .ascii {
         font-family: var(--mono);
         font-size: clamp(5px, 1.3vw, 11px);
@@ -69,85 +100,267 @@
         text-align: left;
         margin: 0 0 24px;
       }
-      h1 { font-size: clamp(26px, 4vw, 40px); margin: 0 0 12px; letter-spacing: -0.5px; }
-      .tagline { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 auto 24px; }
-      .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+      h1 {
+        font-size: clamp(26px, 4vw, 40px);
+        margin: 0 0 12px;
+        letter-spacing: -0.5px;
+      }
+      .tagline {
+        color: var(--muted);
+        font-size: 17px;
+        max-width: 640px;
+        margin: 0 auto 24px;
+      }
+      .badges {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 32px;
+      }
       .badge {
-        font-family: var(--mono); font-size: 12px; padding: 4px 10px;
-        border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: var(--bg-soft);
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--muted);
+        background: var(--bg-soft);
       }
-      .badge b { color: var(--accent); font-weight: 600; }
+      .badge b {
+        color: var(--accent);
+        font-weight: 600;
+      }
       .install {
-        display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-        padding: 14px 18px; font-family: var(--mono); font-size: 14px;
-        max-width: 560px; margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-family: var(--mono);
+        font-size: 14px;
+        max-width: 560px;
+        margin: 0 auto;
       }
-      .install code { color: var(--green); overflow-x: auto; white-space: nowrap; }
+      .install code {
+        color: var(--green);
+        overflow-x: auto;
+        white-space: nowrap;
+      }
       .copy {
-        background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 4px;
-        padding: 4px 10px; cursor: pointer; font-family: var(--mono); font-size: 12px; flex-shrink: 0;
+        background: none;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        border-radius: 4px;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 12px;
+        flex-shrink: 0;
       }
-      .copy:hover { border-color: var(--accent); color: var(--accent); }
-      section { padding: 48px 0; border-top: 1px solid var(--line); }
-      h2 { font-size: 24px; margin: 0 0 8px; }
-      h2 .hash { color: var(--accent); }
-      .sub { color: var(--muted); margin: 0 0 28px; }
+      .copy:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      section {
+        padding: 48px 0;
+        border-top: 1px solid var(--line);
+      }
+      h2 {
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+      h2 .hash {
+        color: var(--accent);
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0 0 28px;
+      }
       .terminal {
-        background: #0d1117; border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+        background: #0d1117;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
         box-shadow: 0 0 40px rgba(251, 191, 36, 0.06);
       }
       .term-bar {
-        display: flex; gap: 6px; padding: 10px 14px;
-        background: var(--bg-soft); border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 6px;
+        padding: 10px 14px;
+        background: var(--bg-soft);
+        border-bottom: 1px solid var(--line);
       }
-      .dot { width: 11px; height: 11px; border-radius: 50%; }
-      .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
-      .term-body { padding: 18px; font-family: var(--mono); font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre; }
-      .t-prompt { color: var(--green); }
-      .t-accent { color: var(--accent); }
-      .t-dim { color: var(--dim); }
-      .t-muted { color: var(--muted); }
-      .t-yellow { color: var(--amber); }
-      .t-cyan { color: var(--cyan); }
-      .t-red { color: var(--red); }
-      .t-green { color: var(--green); }
-      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+      .dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+      }
+      .dot.r {
+        background: #ff5f57;
+      }
+      .dot.y {
+        background: #febc2e;
+      }
+      .dot.g {
+        background: #28c840;
+      }
+      .term-body {
+        padding: 18px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.7;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .t-prompt {
+        color: var(--green);
+      }
+      .t-accent {
+        color: var(--accent);
+      }
+      .t-dim {
+        color: var(--dim);
+      }
+      .t-muted {
+        color: var(--muted);
+      }
+      .t-yellow {
+        color: var(--amber);
+      }
+      .t-cyan {
+        color: var(--cyan);
+      }
+      .t-red {
+        color: var(--red);
+      }
+      .t-green {
+        color: var(--green);
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+      }
       .card {
-        background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 20px;
-        transition: border-color 0.2s, transform 0.2s;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 20px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
       }
-      .card:hover { border-color: var(--accent-dim); transform: translateY(-2px); }
-      .card h3 { margin: 0 0 8px; font-size: 15px; font-family: var(--mono); color: var(--accent); }
-      .card p { margin: 0; color: var(--muted); font-size: 14px; }
-      table { width: 100%; border-collapse: collapse; font-size: 14px; }
-      th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-      th { color: var(--dim); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-      td code { font-family: var(--mono); color: var(--accent); font-size: 13px; }
-      td { color: var(--muted); }
-      .why-item { display: flex; gap: 16px; margin-bottom: 20px; }
-      .why-num { font-family: var(--mono); color: var(--accent); font-size: 20px; font-weight: 700; flex-shrink: 0; }
-      .why-item h3 { margin: 0 0 4px; font-size: 16px; }
-      .why-item p { margin: 0; color: var(--muted); font-size: 14px; }
+      .card:hover {
+        border-color: var(--accent-dim);
+        transform: translateY(-2px);
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        font-family: var(--mono);
+        color: var(--accent);
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        color: var(--dim);
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      td code {
+        font-family: var(--mono);
+        color: var(--accent);
+        font-size: 13px;
+      }
+      td {
+        color: var(--muted);
+      }
+      .why-item {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .why-num {
+        font-family: var(--mono);
+        color: var(--accent);
+        font-size: 20px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .why-item h3 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+      .why-item p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
       pre.codeblock {
-        background: #0d1117; border: 1px solid var(--line); border-radius: 8px;
-        padding: 18px; font-family: var(--mono); font-size: 13px; overflow-x: auto; color: var(--text);
+        background: #0d1117;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+        font-family: var(--mono);
+        font-size: 13px;
+        overflow-x: auto;
+        color: var(--text);
       }
-      .codeblock .k { color: var(--cyan); }
-      .codeblock .s { color: var(--green); }
+      .codeblock .k {
+        color: var(--cyan);
+      }
+      .codeblock .s {
+        color: var(--green);
+      }
       footer {
-        border-top: 1px solid var(--line); padding: 32px 0; text-align: center;
-        color: var(--dim); font-size: 13px;
+        border-top: 1px solid var(--line);
+        padding: 32px 0;
+        text-align: center;
+        color: var(--dim);
+        font-size: 13px;
       }
-      footer a { color: var(--muted); text-decoration: none; }
-      footer a:hover { color: var(--accent); }
-      .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; }
+      footer a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--accent);
+      }
+      .swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
       <nav>
-        <a class="logo" href="https://l-ubu.github.io/cursor-keys/">▟ cursor-keys</a>
+        <a class="logo" href="https://l-ubu.github.io/cursor-keys/"
+          >▟ cursor-keys</a
+        >
         <div class="nav-links">
           <a href="https://github.com/L-ubu/cursor-keys">github</a>
           <a href="https://github.com/L-ubu/cursor-keys/issues">issues</a>
@@ -156,13 +369,15 @@
       </nav>
 
       <header class="hero">
-        <div class="ascii"> ╔═╗┬ ┬┬─┐┌─┐┌─┐┬─┐  ┬┌─┌─┐┬ ┬┌─┐
- │  │ │├┬┘└─┐│ │├┬┘  ├┴┐├┤ └┬┘└─┐
- └─┘└─┘┴└─└─┘└─┘┴└─  ┴ ┴└─┘ ┴ └─┘</div>
+        <div class="ascii">
+          ╔═╗┬ ┬┬─┐┌─┐┌─┐┬─┐ ┬┌─┌─┐┬ ┬┌─┐ │ │ │├┬┘└─┐│ │├┬┘ ├┴┐├┤ └┬┘└─┐
+          └─┘└─┘┴└─└─┘└─┘┴└─ ┴ ┴└─┘ ┴ └─┘
+        </div>
         <h1>One window, one project, one key</h1>
         <p class="tagline">
-          Cursor stores your BYOK API key once per profile, not per repo. cursor-keys gives every project its own
-          isolated profile so each window automatically uses the right key, even side by side.
+          Cursor stores your BYOK API key once per profile, not per repo.
+          cursor-keys gives every project its own isolated profile so each
+          window automatically uses the right key, even side by side.
         </p>
         <div class="badges">
           <span class="badge"><b>zero</b> dependencies</span>
@@ -178,22 +393,40 @@
 
       <section>
         <h2><span class="hash">#</span> stop billing the wrong project</h2>
-        <p class="sub">Register a project once. Every window you open for it, forever, uses its own key. The status line tells the truth at a glance.</p>
+        <p class="sub">
+          Register a project once. Every window you open for it, forever, uses
+          its own key. The status line tells the truth at a glance.
+        </p>
         <div class="terminal">
-          <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
-          <div class="term-body"><span class="t-prompt">$</span> cursor-keys add nokia --path ~/Projects/nokia-main-cs
-<span class="t-green">Profile ready: ~/.cursor-profiles/nokia</span>
+          <div class="term-bar">
+            <span class="dot r"></span><span class="dot y"></span
+            ><span class="dot g"></span>
+          </div>
+          <div class="term-body">
+            <span class="t-prompt">$</span> cursor-keys add nokia --path
+            ~/Projects/nokia-main-cs
+            <span class="t-green">Profile ready: ~/.cursor-profiles/nokia</span>
 
-<span class="t-prompt">$</span> cursor-keys clone nokia <span class="t-dim"># sign-in, settings, models from main</span>
-<span class="t-prompt">$</span> cursor-keys set-key nokia <span class="t-dim"># hidden prompt, encrypted write</span>
-<span class="t-green">Key set for nokia</span> <span class="t-dim">(encrypted with Cursor safeStorage, round-trip verified)</span>
+            <span class="t-prompt">$</span> cursor-keys clone nokia
+            <span class="t-dim"># sign-in, settings, models from main</span>
+            <span class="t-prompt">$</span> cursor-keys set-key nokia
+            <span class="t-dim"># hidden prompt, encrypted write</span>
+            <span class="t-green">Key set for nokia</span>
+            <span class="t-dim"
+              >(encrypted with Cursor safeStorage, round-trip verified)</span
+            >
 
-<span class="t-prompt">$</span> cursor-keys status
+            <span class="t-prompt">$</span> cursor-keys status
 
-  <span class="t-accent">Project             Color    Windows  Key  Repo</span>
-  famework-platform-1 <span class="t-cyan">#339af0</span>   <span class="t-green">1</span>       <span class="t-green">yes</span>  ~/Projects/famework-platform-1
-  jlr_mss             <span class="t-cyan">#4f8cff</span>   0       <span class="t-yellow">no</span>   ~/Projects/jlr_mss
-  nokia               <span class="t-yellow">#845ef7</span>   <span class="t-green">1</span>       <span class="t-green">yes</span>  ~/Projects/nokia-main-cs</div>
+            <span class="t-accent">Project Color Windows Key Repo</span>
+            famework-platform-1 <span class="t-cyan">#339af0</span>
+            <span class="t-green">1</span>
+            <span class="t-green">yes</span> ~/Projects/famework-platform-1
+            jlr_mss <span class="t-cyan">#4f8cff</span> 0
+            <span class="t-yellow">no</span> ~/Projects/jlr_mss nokia
+            <span class="t-yellow">#845ef7</span> <span class="t-green">1</span>
+            <span class="t-green">yes</span> ~/Projects/nokia-main-cs
+          </div>
         </div>
       </section>
 
@@ -203,58 +436,127 @@
         <div class="cards">
           <div class="card">
             <h3>isolated profiles</h3>
-            <p>One <code>--user-data-dir</code> per project, the only way Cursor can hold two keys at once. Extensions and MCP config stay shared.</p>
+            <p>
+              One <code>--user-data-dir</code> per project, the only way Cursor
+              can hold two keys at once. Extensions and MCP config stay shared.
+            </p>
           </div>
           <div class="card">
             <h3>encrypted key injection</h3>
-            <p><code>set-key</code> encrypts with Cursor's own safeStorage (Chromium OSCrypt) and writes the profile's secret store. Round-trip verified, never plaintext.</p>
+            <p>
+              <code>set-key</code> encrypts with Cursor's own safeStorage
+              (Chromium OSCrypt) and writes the profile's secret store.
+              Round-trip verified, never plaintext.
+            </p>
           </div>
           <div class="card">
             <h3>clone your setup</h3>
-            <p><code>clone</code> copies sign-in, theme, and model config from your main Cursor. New profiles open ready, no onboarding wall.</p>
+            <p>
+              <code>clone</code> copies sign-in, theme, and model config from
+              your main Cursor. New profiles open ready, no onboarding wall.
+            </p>
           </div>
           <div class="card">
             <h3>see the active key</h3>
-            <p>Title bar color per project, a status bar item in every window, and <code>status</code> in the terminal. Three layers of "which key am I on".</p>
+            <p>
+              Title bar color per project, a status bar item in every window,
+              and <code>status</code> in the terminal. Three layers of "which
+              key am I on".
+            </p>
           </div>
           <div class="card">
             <h3>wrong-window guard</h3>
-            <p>Companion extension notices when a repo is open in the wrong profile and offers a one-click relaunch into the right one.</p>
+            <p>
+              Companion extension notices when a repo is open in the wrong
+              profile and offers a one-click relaunch into the right one.
+            </p>
           </div>
           <div class="card">
             <h3>zero dependencies</h3>
-            <p>Plain Node ≥18 + sqlite3. Nothing to audit, nothing to break, nothing to update.</p>
+            <p>
+              Plain Node ≥18 + sqlite3. Nothing to audit, nothing to break,
+              nothing to update.
+            </p>
           </div>
         </div>
       </section>
 
       <section>
         <h2><span class="hash">#</span> commands</h2>
-        <p class="sub">One binary, two names: <code>cursor-keys</code> and <code>ckeys</code>.</p>
+        <p class="sub">
+          One binary, two names: <code>cursor-keys</code> and
+          <code>ckeys</code>.
+        </p>
         <table>
           <thead>
-            <tr><th>command</th><th>what it does</th></tr>
+            <tr>
+              <th>command</th>
+              <th>what it does</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td><code>add &lt;name&gt;</code></td><td>register project + create profile</td></tr>
-            <tr><td><code>clone &lt;name&gt;</code></td><td>inherit sign-in, settings, model config from main Cursor</td></tr>
-            <tr><td><code>set-key &lt;name&gt;</code></td><td>inject the project API key, encrypted and verified</td></tr>
-            <tr><td><code>open [name]</code></td><td>launch Cursor with the profile (auto-detect from cwd)</td></tr>
-            <tr><td><code>status</code></td><td>projects, colors, running windows, key configured</td></tr>
-            <tr><td><code>doctor [name]</code></td><td>health checks: key row, base URL, subagent overrides</td></tr>
-            <tr><td><code>wrap --install</code></td><td>plain <code>cursor &lt;path&gt;</code> auto-picks the profile</td></tr>
-            <tr><td><code>aliases --install</code></td><td>per-project shell aliases</td></tr>
-            <tr><td><code>install-extension</code></td><td>status bar + wrong-window guard inside Cursor</td></tr>
-            <tr><td><code>init</code></td><td>scan a directory for git repos and register them</td></tr>
-            <tr><td><code>config</code></td><td>show or set the gateway base URL</td></tr>
-            <tr><td><code>sync</code></td><td>re-copy main Cursor settings into profiles (automatic on every <code>open</code>)</td></tr>
+            <tr>
+              <td><code>add &lt;name&gt;</code></td>
+              <td>register project + create profile</td>
+            </tr>
+            <tr>
+              <td><code>clone &lt;name&gt;</code></td>
+              <td>inherit sign-in, settings, model config from main Cursor</td>
+            </tr>
+            <tr>
+              <td><code>set-key &lt;name&gt;</code></td>
+              <td>inject the project API key, encrypted and verified</td>
+            </tr>
+            <tr>
+              <td><code>open [name]</code></td>
+              <td>launch Cursor with the profile (auto-detect from cwd)</td>
+            </tr>
+            <tr>
+              <td><code>status</code></td>
+              <td>projects, colors, running windows, key configured</td>
+            </tr>
+            <tr>
+              <td><code>doctor [name]</code></td>
+              <td>health checks: key row, base URL, subagent overrides</td>
+            </tr>
+            <tr>
+              <td><code>wrap --install</code></td>
+              <td>
+                plain <code>cursor &lt;path&gt;</code> auto-picks the profile
+              </td>
+            </tr>
+            <tr>
+              <td><code>aliases --install</code></td>
+              <td>per-project shell aliases</td>
+            </tr>
+            <tr>
+              <td><code>install-extension</code></td>
+              <td>status bar + wrong-window guard inside Cursor</td>
+            </tr>
+            <tr>
+              <td><code>init</code></td>
+              <td>scan a directory for git repos and register them</td>
+            </tr>
+            <tr>
+              <td><code>config</code></td>
+              <td>show or set the gateway base URL</td>
+            </tr>
+            <tr>
+              <td><code>sync</code></td>
+              <td>
+                re-copy main Cursor settings into profiles (automatic on every
+                <code>open</code>)
+              </td>
+            </tr>
           </tbody>
         </table>
       </section>
 
       <section>
         <h2><span class="hash">#</span> config</h2>
-        <p class="sub">Optional. Lives at <code>~/.config/cursor-keys/config.json</code>.</p>
+        <p class="sub">
+          Optional. Lives at <code>~/.config/cursor-keys/config.json</code>.
+        </p>
         <pre class="codeblock">{
   <span class="k">"profilesRoot"</span>: <span class="s">"~/.cursor-profiles"</span>,          <span class="t-dim">// where isolated profiles live</span>
   <span class="k">"baseUrl"</span>: <span class="s">"https://connect.iobonzai.com/cursor"</span>, <span class="t-dim">// your gateway endpoint</span>
@@ -271,21 +573,33 @@
           <span class="why-num">01</span>
           <div>
             <h3>Keys are profile-global, work is per-project</h3>
-            <p>No setting, env var, or extension API can swap Cursor's key per folder. Separate profiles are the only correct mechanism, so cursor-keys makes them effortless.</p>
+            <p>
+              No setting, env var, or extension API can swap Cursor's key per
+              folder. Separate profiles are the only correct mechanism, so
+              cursor-keys makes them effortless.
+            </p>
           </div>
         </div>
         <div class="why-item">
           <span class="why-num">02</span>
           <div>
             <h3>Billing the wrong client is a silent failure</h3>
-            <p>You never notice a wrong key until the invoice. Colors, a status bar item, and a wrong-window guard turn an invisible mistake into an obvious one.</p>
+            <p>
+              You never notice a wrong key until the invoice. Colors, a status
+              bar item, and a wrong-window guard turn an invisible mistake into
+              an obvious one.
+            </p>
           </div>
         </div>
         <div class="why-item">
           <span class="why-num">03</span>
           <div>
             <h3>Secrets deserve real storage</h3>
-            <p>Keys are written into Cursor's own encrypted secret store with Cursor's own encryption. Not dotfiles, not environment dumps, not READMEs.</p>
+            <p>
+              Keys are written into Cursor's own encrypted secret store with
+              Cursor's own encryption. Not dotfiles, not environment dumps, not
+              READMEs.
+            </p>
           </div>
         </div>
       </section>
@@ -299,9 +613,9 @@
 
     <script>
       function copyInstall(btn) {
-        navigator.clipboard.writeText('npm install -g cursor-keys');
-        btn.textContent = 'copied!';
-        setTimeout(() => (btn.textContent = 'copy'), 1500);
+        navigator.clipboard.writeText("npm install -g cursor-keys");
+        btn.textContent = "copied!";
+        setTimeout(() => (btn.textContent = "copy"), 1500);
       }
     </script>
   </body>

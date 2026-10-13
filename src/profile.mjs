@@ -116,7 +116,14 @@ export function cloneStateDb(donorProfileDir, targetProfileDir) {
   ensureProfileStructure(targetProfileDir);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
 
-  execSync(`sqlite3 ${shellQuote(src)} ".backup ${shellQuote(dest)}"`, {
+  // VACUUM INTO requires a fresh destination.
+  for (const suffix of ["", "-wal", "-shm", "-journal"]) {
+    fs.rmSync(dest + suffix, { force: true });
+  }
+
+  // VACUUM INTO snapshots a consistent copy even while the donor Cursor is
+  // running; `.backup` can spin at full CPU against a write-heavy donor.
+  execSync(`sqlite3 ${shellQuote(src)} "VACUUM INTO ${shellQuote(dest)}"`, {
     stdio: "ignore",
   });
 }
