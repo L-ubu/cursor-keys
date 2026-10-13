@@ -43,6 +43,7 @@ import {
   needsFirstRunChecklist,
   printFirstRunChecklist,
   profileIntegrityChecks,
+  writeProfileSettings,
 } from "./profile.mjs";
 import { setProfileApiKey } from "./keychain.mjs";
 
@@ -69,6 +70,8 @@ export async function runCommand(argv) {
       return cmdCurrent(rest);
     case "config":
       return cmdConfig(rest);
+    case "sync":
+      return cmdSync(rest);
     case "doctor":
       return cmdDoctor(rest);
     case "aliases":
@@ -214,6 +217,33 @@ async function cmdConfig(args) {
   console.log(`${dim}doctor verifies this per profile.${reset}`);
 }
 
+async function cmdSync(args) {
+  const { flags, positional } = parseFlags(args);
+  if (flags.help) {
+    console.log("Usage: cursor-keys sync [name]");
+    return;
+  }
+  const config = loadConfig();
+  const names = positional[0]
+    ? [positional[0]]
+    : Object.keys(config.projects).sort();
+  if (!names.length) {
+    console.log("No projects registered. Run: cursor-keys init");
+    return;
+  }
+  for (const name of names) {
+    const project = getProject(config, name);
+    if (!project) throw new Error(`Unknown project: ${name}`);
+    if (!fs.existsSync(project.profileDir)) {
+      console.log(warn(`skip ${name}: profile missing (run add first)`));
+      continue;
+    }
+    writeProfileSettings(project.profileDir, name, project.color);
+    console.log(ok(`Synced settings from main -> ${name}`));
+  }
+  console.log(`${dim}Open Cursor windows reload settings automatically.${reset}`);
+}
+
 async function cmdInit(args) {
   const { flags, positional } = parseFlags(args);
   if (flags.help) {
@@ -353,6 +383,13 @@ async function cmdOpen(args) {
 
   if (!fs.existsSync(project.profileDir)) {
     throw new Error(`Profile missing. Run: cursor-keys add ${name}`);
+  }
+
+  // Refresh settings from main so every open picks up the latest tweaks.
+  try {
+    writeProfileSettings(project.profileDir, name, project.color);
+  } catch {
+    // Never block an open on a settings rewrite failure.
   }
 
   const child = spawn(

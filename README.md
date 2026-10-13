@@ -60,7 +60,9 @@ cursor-keys install-extension     # status bar indicator + wrong-window guard
 
 ## How it works
 
-One window, one profile, one key. Each project gets an isolated `--user-data-dir` under `~/.cursor-profiles/<name>/`, which is the only way Cursor can hold two API keys at once. Extensions, MCP config, and keybindings stay shared; settings, secrets, and sign-in isolate, which is exactly the split you want.
+One window, one profile, one key. Each project gets an isolated `--user-data-dir` under `~/.cursor-profiles/<name>/`, which is the only way Cursor can hold two API keys at once. Extensions, MCP config, keybindings, and snippets stay shared (symlinked); secrets and sign-in isolate, which is exactly the split you want.
+
+Settings flow one way, main to profiles: `sync` re-copies your main `settings.json` into every profile and re-applies that profile's title bar color on top. `open` does this automatically before every launch, and open windows hot-reload the file, so tweaks in your main Cursor show up everywhere. Changes made inside a profile window are overwritten on the next sync.
 
 `clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config. `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" Keychain item) and writes it into the profile's secret store, round-trip verified. macOS asks for Keychain permission once; click Always Allow.
 
@@ -82,6 +84,7 @@ One window, one profile, one key. Each project gets an isolated `--user-data-dir
 | `status` | Projects, colors, running windows, key configured |
 | `current` | Mapping for the current directory |
 | `config [baseUrl [URL]]` | Show or set the gateway base URL |
+| `sync [name]` | Re-copy main Cursor settings into profiles |
 | `doctor [name]` | Health checks: key row, base URL, subagent overrides |
 | `wrap [--install]` | zsh function so plain `cursor <path>` auto-picks the profile |
 | `aliases [--install]` | Per-project shell aliases |

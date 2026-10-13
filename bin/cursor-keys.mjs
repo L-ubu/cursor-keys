@@ -28,6 +28,9 @@ function printHelp() {
     "  config [baseUrl [URL]]      Show or set config (gateway base URL)",
   );
   console.log(
+    "  sync [name]                 Re-copy main Cursor settings into profiles",
+  );
+  console.log(
     "  doctor [name]               Verify setup for one or all projects",
   );
   console.log("  aliases [--install]         Print or install shell aliases");
