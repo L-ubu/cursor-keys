@@ -63,8 +63,11 @@ The key goes into Cursor's own encrypted store, never into a plaintext file.
 ```bash
 cursor-keys wrap --install      # plain `cursor <path>` auto-picks the right profile
 cursor-keys aliases --install   # per-project aliases: `myproject` opens its window
-cursor-keys install-extension   # status bar indicator + wrong-window guard
 cursor-keys sync                # re-copy main Cursor settings into all profiles (also runs on every `open`)
+
+# companion extension, pick one:
+#   a) Cursor Extensions panel -> search "cursor-keys" -> Install (Open VSX marketplace)
+#   b) cursor-keys install-extension   (links the extension from this clone, dev mode)
 ```
 
 Restart your terminal (or `source ~/.zshrc`) after wrap/aliases.
