@@ -17,11 +17,11 @@ Cursor stores your BYOK API key once per profile, not per repo. cursor-keys give
 ## 1. Install the CLI
 
 ```bash
-git clone https://github.com/L-ubu/cursor-keys.git
-cd cursor-keys
-npm link
+npm install -g cursor-keys
 cursor-keys --help   # sanity check: banner + command list
 ```
+
+(Dev alternative: clone the repo and `npm link` from it.)
 
 ## 2. Set your gateway (iO/Bonzai testers: skip, this is the default)
 
