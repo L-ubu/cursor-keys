@@ -18,6 +18,12 @@ function printHelp() {
   );
   console.log("  add <name> [options]        Create profile for a project");
   console.log(
+    "  clone <name> [--from main]  Copy sign-in + settings from a donor profile",
+  );
+  console.log(
+    "  set-key <name>              Inject the project API key (encrypted)",
+  );
+  console.log(
     "  open [name]                 Open Cursor with this project's profile",
   );
   console.log(
