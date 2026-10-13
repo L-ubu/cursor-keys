@@ -25,6 +25,9 @@ function printHelp() {
   );
   console.log("  current                     Show mapping for cwd");
   console.log(
+    "  config [baseUrl [URL]]      Show or set config (gateway base URL)",
+  );
+  console.log(
     "  doctor [name]               Verify setup for one or all projects",
   );
   console.log("  aliases [--install]         Print or install shell aliases");

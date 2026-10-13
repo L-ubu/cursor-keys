@@ -22,6 +22,14 @@ describe("config", () => {
     assert.match(cfg.projects.demo.color, /^#[0-9a-fA-F]{6}$/);
   });
 
+  it("validateConfig keeps custom baseUrl", () => {
+    const cfg = validateConfig({
+      baseUrl: "https://litellm.example.com/v1",
+      projects: {},
+    });
+    assert.equal(cfg.baseUrl, "https://litellm.example.com/v1");
+  });
+
   it("pickColorForName is stable", () => {
     assert.equal(pickColorForName("jlr_mss"), pickColorForName("jlr_mss"));
   });

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   baseUrlFragment,
   collapseHome,
+  CONFIG_FILE,
   expandHome,
   findProjectByPath,
   getProject,
@@ -66,6 +67,8 @@ export async function runCommand(argv) {
       return cmdStatus(rest);
     case "current":
       return cmdCurrent(rest);
+    case "config":
+      return cmdConfig(rest);
     case "doctor":
       return cmdDoctor(rest);
     case "aliases":
@@ -163,6 +166,52 @@ function ask(question) {
       resolve(answer.trim());
     });
   });
+}
+
+async function cmdConfig(args) {
+  const { flags, positional } = parseFlags(args);
+  if (flags.help) {
+    console.log("Usage: cursor-keys config [baseUrl [URL]]");
+    return;
+  }
+  const config = loadConfig();
+  const [key, value] = positional;
+
+  if (!key) {
+    const count = Object.keys(config.projects).length;
+    console.log(
+      `${bold}Config${reset} ${dim}(${collapseHome(CONFIG_FILE)})${reset}`,
+    );
+    console.log(`  baseUrl:      ${config.baseUrl}`);
+    console.log(`  profilesRoot: ${config.profilesRoot}`);
+    console.log(
+      `  projects:     ${count} registered ${dim}(see cursor-keys status)${reset}`,
+    );
+    return;
+  }
+
+  if (key !== "baseUrl") {
+    throw new Error(`Unknown config key: ${key}. Known keys: baseUrl`);
+  }
+  if (!value) {
+    console.log(config.baseUrl);
+    return;
+  }
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(
+      `Invalid baseUrl: ${value} (example: https://gateway.example.com/v1)`,
+    );
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new Error(`baseUrl must start with http(s)://: ${value}`);
+  }
+  config.baseUrl = value;
+  saveConfig(config);
+  console.log(ok(`baseUrl set: ${value}`));
+  console.log(`${dim}doctor verifies this per profile.${reset}`);
 }
 
 async function cmdInit(args) {

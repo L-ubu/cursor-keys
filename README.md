@@ -36,6 +36,9 @@ Requires Node ≥18, the Cursor CLI (`Shell Command: Install 'cursor' in PATH`),
 ## Quick start
 
 ```bash
+# one-time, only if your gateway is not the Bonzai default
+cursor-keys config baseUrl https://your-gateway.example.com/v1
+
 # one-time per project
 cursor-keys add acme --path ~/Projects/acme     # register + create profile
 cursor-keys clone acme                          # inherit sign-in, settings, model config from main Cursor
@@ -78,6 +81,7 @@ One window, one profile, one key. Each project gets an isolated `--user-data-dir
 | `open [name]` | Launch Cursor with the profile (auto-detect from cwd) |
 | `status` | Projects, colors, running windows, key configured |
 | `current` | Mapping for the current directory |
+| `config [baseUrl [URL]]` | Show or set the gateway base URL |
 | `doctor [name]` | Health checks: key row, base URL, subagent overrides |
 | `wrap [--install]` | zsh function so plain `cursor <path>` auto-picks the profile |
 | `aliases [--install]` | Per-project shell aliases |
