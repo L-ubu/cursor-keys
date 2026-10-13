@@ -8,8 +8,10 @@ import {
   baseUrlFragment,
   collapseHome,
   CONFIG_FILE,
+  CONFIG_GETTABLE_KEYS,
   expandHome,
   findProjectByPath,
+  getConfigValue,
   getProject,
   loadConfig,
   pickColorForName,
@@ -177,11 +179,29 @@ function ask(question) {
 async function cmdConfig(args) {
   const { flags, positional } = parseFlags(args);
   if (flags.help) {
-    console.log("Usage: cursor-keys config [baseUrl [URL]]");
+    console.log(
+      "Usage: cursor-keys config                      Show config summary",
+    );
+    console.log(
+      "       cursor-keys config get <key>            Print one value (baseUrl, profilesRoot)",
+    );
+    console.log(
+      "       cursor-keys config baseUrl <URL>        Set gateway base URL",
+    );
     return;
   }
   const config = loadConfig();
   const [key, value] = positional;
+
+  if (key === "get") {
+    if (!value) {
+      throw new Error(
+        `Missing config key. Usage: cursor-keys config get <${CONFIG_GETTABLE_KEYS.join("|")}>`,
+      );
+    }
+    console.log(getConfigValue(config, value));
+    return;
+  }
 
   if (!key) {
     const count = Object.keys(config.projects).length;
@@ -295,7 +315,7 @@ async function cmdInit(args) {
   }
   saveConfig(config);
   console.log(
-    `\nNext: cursor-keys add <name> --clone main   (creates profile + copies Bonzai settings)`,
+    `\nNext: cursor-keys add <name> --clone main   (creates profile + copies main Cursor settings)`,
   );
 }
 
@@ -516,7 +536,7 @@ async function cmdDoctor(args) {
     if (fs.existsSync(db)) {
       const hasKey = stateDbHasKey(db, SECRET_OPENAI_KEY);
       console.log(
-        `  ${hasKey ? ok("✓") : warn("✗")} OpenAI/Bonzai API key row present`,
+        `  ${hasKey ? ok("✓") : warn("✗")} OpenAI API key row present`,
       );
       if (hasKey) {
         const mainDb = path.join(

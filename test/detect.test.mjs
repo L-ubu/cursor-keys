@@ -13,10 +13,10 @@ import {
 describe("detect", () => {
   it("parseUserDataDirFromCommandLine with space", () => {
     const line =
-      "/Applications/Cursor.app/Contents/MacOS/Cursor --user-data-dir /Users/me/.cursor-profiles/jlr_mss --new-window /Users/me/Projects/jlr_mss";
+      "/Applications/Cursor.app/Contents/MacOS/Cursor --user-data-dir /Users/me/.cursor-profiles/acme --new-window /Users/me/Projects/acme";
     assert.equal(
       parseUserDataDirFromCommandLine(line),
-      "/Users/me/.cursor-profiles/jlr_mss",
+      "/Users/me/.cursor-profiles/acme",
     );
   });
 
@@ -46,7 +46,9 @@ describe("detect", () => {
     setup(a, "same-encrypted-blob");
     setup(b, "same-encrypted-blob");
     assert.equal(stateDbValuesMatch(a, b, "k"), true);
-    execSync(`sqlite3 '${b}' "UPDATE ItemTable SET value = 'other' WHERE key = 'k';"`);
+    execSync(
+      `sqlite3 '${b}' "UPDATE ItemTable SET value = 'other' WHERE key = 'k';"`,
+    );
     assert.equal(stateDbValuesMatch(a, b, "k"), false);
     fs.rmSync(dir, { recursive: true, force: true });
   });

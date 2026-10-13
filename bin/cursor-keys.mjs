@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 
 import { runCommand } from "../src/commands.mjs";
-import { bold, cyan, dim, reset } from "../src/ansi.mjs";
+import { bold, dim, reset, yellow } from "../src/ansi.mjs";
 
 const BANNER = `
- ${cyan}╔═╗┬ ┬┬─┐┌─┐┌─┐┬─┐  ┬┌─┌─┐┬ ┬┌─┐
- ${cyan}│  │ │├┬┘└─┐│ │├┬┘  ├┴┐├┤ └┬┘└─┐
- ${cyan}└─┘└─┘┴└─└─┘└─┘┴└─  ┴ ┴└─┘ ┴ └─┘${dim}  per-project Cursor API keys
+ ${yellow} ██████╗██╗   ██╗██████╗ ███████╗ ██████╗ ██████╗     ██╗  ██╗███████╗██╗   ██╗███████╗
+ ${yellow}██╔════╝██║   ██║██╔══██╗██╔════╝██╔═══██╗██╔══██╗    ██║ ██╔╝██╔════╝╚██╗ ██╔╝██╔════╝
+ ${yellow}██║     ██║   ██║██████╔╝███████╗██║   ██║██████╔╝    █████╔╝ █████╗   ╚████╔╝ ███████╗
+ ${yellow}██║     ██║   ██║██╔══██╗╚════██║██║   ██║██╔══██╗    ██╔═██╗ ██╔══╝    ╚██╔╝  ╚════██║
+ ${yellow}╚██████╗╚██████╔╝██║  ██║███████║╚██████╔╝██║  ██║    ██║  ██╗███████╗   ██║   ███████║
+ ${yellow} ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝${reset}${dim}  per-project Cursor API keys
 `;
 
 function printHelp() {
@@ -31,7 +34,7 @@ function printHelp() {
   );
   console.log("  current                     Show mapping for cwd");
   console.log(
-    "  config [baseUrl [URL]]      Show or set config (gateway base URL)",
+    "  config [get <key>|baseUrl [URL]]  Show, read, or set config values",
   );
   console.log(
     "  sync [name]                 Re-copy main Cursor settings into profiles",

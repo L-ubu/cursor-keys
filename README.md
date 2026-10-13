@@ -1,27 +1,42 @@
-# cursor-keys
-
-> Per-project Cursor profiles so every window automatically uses the right BYOK API key. Two windows, two projects, two keys, zero switching.
-
-Cursor stores your OpenAI-compatible API key (Bonzai, LiteLLM, AI Gateway, ...) **once per profile**, not per repo. If you bill five client projects, you either babysit Settings all day or bill the wrong project. `cursor-keys` gives each project its own isolated profile and makes opening, switching, and checking keys automatic.
+<div align="center">
 
 ```
-  ╔═╗┬ ┬┬─┐┌─┐┌─┐┬─┐  ┬┌─┌─┐┬ ┬┌─┐
-  │  │ │├┬┘└─┐│ │├┬┘  ├┴┐├┤ └┬┘└─┐
-  └─┘└─┘┴└─└─┘└─┘┴└─  ┴ ┴└─┘ ┴ └─┘  per-project Cursor API keys
+ ██████╗██╗   ██╗██████╗ ███████╗ ██████╗ ██████╗     ██╗  ██╗███████╗██╗   ██╗███████╗
+██╔════╝██║   ██║██╔══██╗██╔════╝██╔═══██╗██╔══██╗    ██║ ██╔╝██╔════╝╚██╗ ██╔╝██╔════╝
+██║     ██║   ██║██████╔╝███████╗██║   ██║██████╔╝    █████╔╝ █████╗   ╚████╔╝ ███████╗
+██║     ██║   ██║██╔══██╗╚════██║██║   ██║██╔══██╗    ██╔═██╗ ██╔══╝    ╚██╔╝  ╚════██║
+╚██████╗╚██████╔╝██║  ██║███████║╚██████╔╝██║  ██║    ██║  ██╗███████╗   ██║   ███████║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝
+```
 
+**Per-project Cursor profiles so every window uses the right BYOK API key.**
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A518-5FA04E.svg)](https://nodejs.org)
+[![Runtime dependencies](https://img.shields.io/badge/runtime%20deps-0-brightgreen.svg)](#development)
+
+[Website](https://l-ubu.github.io/cursor-keys/) · [Install](#install) · [Commands](#commands) · [Config](#config)
+
+</div>
+
+---
+
+Cursor stores your OpenAI-compatible API key (LiteLLM, Vercel AI Gateway, corporate proxy, ...) **once per profile**, not per repo. If you bill five client projects, you either babysit Settings all day or bill the wrong project. `cursor-keys` gives each project its own isolated profile and makes opening, switching, and checking keys automatic.
+
+```
 $ cursor-keys status
 
-  Project             | Color    | Windows | Key | Repo
-  --------------------+----------+---------+-----+-------------------------
-  famework-platform-1 | #339af0  | 1       | yes | ~/Projects/famework-platform-1
-  jlr_mss             | #4f8cff  | 0       | no  | ~/Projects/jlr_mss
-  nokia               | #845ef7  | 1       | yes | ~/Projects/nokia-main-cs
+  Project   | Color    | Windows | Key | Repo
+  ----------+----------+---------+-----+------------------
+  acme      | #4f8cff  | 1       | yes | ~/Projects/acme
+  client-a  | #51cf66  | 0       | no  | ~/Projects/client-a
+  client-b  | #845ef7  | 1       | yes | ~/Projects/client-b
 
-$ cursor-keys doctor nokia
+$ cursor-keys doctor acme
 
-  ✓ OpenAI/Bonzai API key row present
+  ✓ OpenAI API key row present
   ✓ Explore subagent overrides present
-  ✓ Base URL (connect.iobonzai.com/cursor) in profile state
+  ✓ Base URL (gateway.example.com/v1) in profile state
 ```
 
 ## Install
@@ -36,8 +51,8 @@ Requires Node ≥18, the Cursor CLI (`Shell Command: Install 'cursor' in PATH`),
 ## Quick start
 
 ```bash
-# one-time, only if your gateway is not the Bonzai default
-cursor-keys config baseUrl https://your-gateway.example.com/v1
+# one-time: point at your OpenAI-compatible gateway
+cursor-keys config baseUrl https://gateway.example.com/v1
 
 # one-time per project
 cursor-keys add acme --path ~/Projects/acme     # register + create profile
@@ -64,7 +79,7 @@ One window, one profile, one key. Each project gets an isolated `--user-data-dir
 
 Settings flow one way, main to profiles: `sync` re-copies your main `settings.json` into every profile and re-applies that profile's title bar color on top. `open` does this automatically before every launch, and open windows hot-reload the file, so tweaks in your main Cursor show up everywhere. Changes made inside a profile window are overwritten on the next sync.
 
-`clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config. `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" Keychain item) and writes it into the profile's secret store, round-trip verified. macOS asks for Keychain permission once; click Always Allow.
+`clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config. `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" macOS Keychain item) and writes it into the profile's secret store, round-trip verified. macOS asks for Keychain permission once; click Always Allow.
 
 ## "Which key am I on?" in three layers
 
@@ -83,7 +98,7 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)        |
 | `status`                                       | Projects, colors, running windows, key configured            |
 | `current`                                      | Mapping for the current directory                            |
-| `config [baseUrl [URL]]`                       | Show or set the gateway base URL                             |
+| `config [get <key> · baseUrl [URL]]`           | Show summary, print one value, or set the gateway base URL   |
 | `sync [name]`                                  | Re-copy main Cursor settings into profiles                   |
 | `doctor [name]`                                | Health checks: key row, base URL, subagent overrides         |
 | `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile |
@@ -98,14 +113,21 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 ```json
 {
   "profilesRoot": "~/.cursor-profiles",
-  "baseUrl": "https://connect.iobonzai.com/cursor",
+  "baseUrl": "https://gateway.example.com/v1",
   "projects": {
     "acme": { "path": "~/Projects/acme", "color": "#4f8cff" }
   }
 }
 ```
 
-`baseUrl` is your gateway's OpenAI-compatible endpoint (Bonzai default; point it at LiteLLM, Vercel AI Gateway, ...). `doctor` verifies it per profile.
+`baseUrl` is your gateway's OpenAI-compatible endpoint. `doctor` verifies it per profile.
+
+Read a single value for scripts (stdout only, exit 1 on unknown keys):
+
+```bash
+cursor-keys config get baseUrl
+cursor-keys config get profilesRoot
+```
 
 ## Security
 

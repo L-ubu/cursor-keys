@@ -98,6 +98,21 @@ export function baseUrlFragment(config) {
   return String(config.baseUrl || "").replace(/^https?:\/\//, "");
 }
 
+export const CONFIG_GETTABLE_KEYS = ["baseUrl", "profilesRoot"];
+
+/**
+ * @param {ReturnType<typeof loadConfig>} config
+ * @param {string} key
+ */
+export function getConfigValue(config, key) {
+  if (!CONFIG_GETTABLE_KEYS.includes(key)) {
+    throw new Error(
+      `Unknown config key: ${key}. Known keys: ${CONFIG_GETTABLE_KEYS.join(", ")}`,
+    );
+  }
+  return config[key];
+}
+
 const COLOR_PALETTE = [
   "#4f8cff",
   "#ff6b6b",

@@ -4,7 +4,7 @@ Thanks for testing! Full setup takes about 10 minutes, most of it the one-time p
 
 ## What this is
 
-Cursor stores your BYOK API key once per profile, not per repo. cursor-keys gives each project its own isolated Cursor profile, so every window automatically uses the right key. Repo: <https://github.com/L-ubu/cursor-keys> (private during beta, you need access).
+Cursor stores your BYOK API key once per profile, not per repo. cursor-keys gives each project its own isolated Cursor profile, so every window automatically uses the right key. Repo: <https://github.com/L-ubu/cursor-keys>
 
 ## Before you start
 
@@ -12,7 +12,7 @@ Cursor stores your BYOK API key once per profile, not per repo. cursor-keys give
 - Cursor installed, plus its shell command: in Cursor, `Cmd+Shift+P` → "Shell Command: Install 'cursor' in PATH"
 - Node 18 or newer: `node --version`
 - sqlite3 (preinstalled on macOS, check with `sqlite3 --version`)
-- An API key for your gateway (Bonzai, LiteLLM, ...)
+- An API key for your OpenAI-compatible gateway (LiteLLM, corporate proxy, ...)
 
 ## 1. Install the CLI
 
@@ -23,11 +23,12 @@ cursor-keys --help   # sanity check: banner + command list
 
 (Dev alternative: clone the repo and `npm link` from it.)
 
-## 2. Set your gateway (iO/Bonzai testers: skip, this is the default)
+## 2. Set your gateway
 
 ```bash
-cursor-keys config baseUrl https://your-gateway.example.com/v1
+cursor-keys config baseUrl https://gateway.example.com/v1
 cursor-keys config   # shows current settings
+cursor-keys config get baseUrl   # script-friendly single value
 ```
 
 ## 3. Register a project

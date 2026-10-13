@@ -145,17 +145,16 @@ export function needsFirstRunChecklist(profileDir) {
 
 export function printFirstRunChecklist(
   projectName,
-  baseUrl = "https://connect.iobonzai.com/cursor",
+  baseUrl = "https://gateway.example.com/v1",
 ) {
   console.log(`
 First-time setup for "${projectName}" in this Cursor profile:
 
   1. Cursor Settings → Models → API keys
-  2. Paste your project Bonzai API key under OpenAI API Key
+  2. Paste your project API key under OpenAI API Key (or run: cursor-keys set-key ${projectName})
   3. Enable "Use OpenAI API Key" and "Override OpenAI Base URL"
   4. Base URL: ${baseUrl}
-  5. Explore Subagent Model: Composer 2.5
-  6. Add custom Bonzai models and disable non-Bonzai models
+  5. Add your gateway models and disable models you do not use
 
 Then run: cursor-keys doctor ${projectName}
 `);

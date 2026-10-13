@@ -1,11 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  CONFIG_GETTABLE_KEYS,
+  defaultConfig,
   expandHome,
+  findProjectByPath,
+  getConfigValue,
   pickColorForName,
   pickUnusedColor,
   validateConfig,
-  findProjectByPath,
 } from "../src/config.mjs";
 import path from "node:path";
 
@@ -32,7 +35,7 @@ describe("config", () => {
   });
 
   it("pickColorForName is stable", () => {
-    assert.equal(pickColorForName("jlr_mss"), pickColorForName("jlr_mss"));
+    assert.equal(pickColorForName("acme"), pickColorForName("acme"));
   });
 
   it("pickUnusedColor keeps preferred color when free", () => {
@@ -52,13 +55,62 @@ describe("config", () => {
       profilesRoot: "~/.cursor-profiles",
       projects: {
         root: { path: path.join(home, "Projects") },
-        nested: { path: path.join(home, "Projects", "jlr_mss") },
+        nested: {
+          path: path.join(home, "Projects", "acme-app"),
+          color: "#4f8cff",
+        },
       },
     });
     const hit = findProjectByPath(
       cfg,
-      path.join(home, "Projects", "jlr_mss", "web"),
+      path.join(home, "Projects", "acme-app", "web"),
     );
     assert.equal(hit?.name, "nested");
+  });
+});
+
+describe("config get", () => {
+  it("returns baseUrl from a validated config", () => {
+    const cfg = validateConfig({
+      baseUrl: "https://litellm.example.com/v1",
+      projects: {},
+    });
+    assert.equal(
+      getConfigValue(cfg, "baseUrl"),
+      "https://litellm.example.com/v1",
+    );
+  });
+
+  it("returns profilesRoot verbatim", () => {
+    const cfg = validateConfig({
+      profilesRoot: "~/custom-root",
+      projects: {},
+    });
+    assert.equal(getConfigValue(cfg, "profilesRoot"), "~/custom-root");
+  });
+
+  it("works on defaultConfig when no config file exists", () => {
+    assert.equal(
+      getConfigValue(defaultConfig(), "baseUrl"),
+      "https://connect.iobonzai.com/cursor",
+    );
+  });
+
+  it("throws on unknown key", () => {
+    assert.throws(
+      () => getConfigValue(defaultConfig(), "nope"),
+      /Unknown config key: nope\. Known keys: baseUrl, profilesRoot/,
+    );
+  });
+
+  it("throws on projects key", () => {
+    assert.throws(
+      () => getConfigValue(defaultConfig(), "projects"),
+      /Unknown config key: projects/,
+    );
+  });
+
+  it("CONFIG_GETTABLE_KEYS is baseUrl and profilesRoot", () => {
+    assert.deepEqual(CONFIG_GETTABLE_KEYS, ["baseUrl", "profilesRoot"]);
   });
 });
