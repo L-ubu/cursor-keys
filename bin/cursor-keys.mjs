@@ -9,12 +9,13 @@ const BANNER = `
  ${yellow}██║     ██║   ██║██████╔╝███████╗██║   ██║██████╔╝    █████╔╝ █████╗   ╚████╔╝ ███████╗
  ${yellow}██║     ██║   ██║██╔══██╗╚════██║██║   ██║██╔══██╗    ██╔═██╗ ██╔══╝    ╚██╔╝  ╚════██║
  ${yellow}╚██████╗╚██████╔╝██║  ██║███████║╚██████╔╝██║  ██║    ██║  ██╗███████╗   ██║   ███████║
- ${yellow} ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝${reset}${dim}  per-project Cursor API keys
+ ${yellow} ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝${reset}
+  ${dim}per-project Cursor API keys${reset}
 `;
 
 function printHelp() {
   console.log(BANNER);
-  console.log(`${bold}Usage:${reset} cursor-keys <command> [options]\n`);
+  console.log(`${bold}Usage:${reset} cursor-keys (or ck, ckeys) <command> [options]\n`);
   console.log(`${bold}Commands:${reset}`);
   console.log(
     "  init [--root DIR] [--all]   Scan for git repos and register projects",
@@ -42,7 +43,10 @@ function printHelp() {
   console.log(
     "  doctor [name]               Verify setup for one or all projects",
   );
-  console.log("  aliases [--install]         Print or install shell aliases");
+  console.log("  aliases [--install]         Shell aliases (incl. 'ck' + tab completion)");
+  console.log(
+    "  completion                  Print zsh tab completion (auto-sourced by aliases)",
+  );
   console.log(
     "  wrap [--install]            Make plain `cursor <path>` auto-pick profile",
   );

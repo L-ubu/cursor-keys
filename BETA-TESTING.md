@@ -63,7 +63,7 @@ The key goes into Cursor's own encrypted store, never into a plaintext file.
 
 ```bash
 cursor-keys wrap --install      # plain `cursor <path>` auto-picks the right profile
-cursor-keys aliases --install   # per-project aliases: `myproject` opens its window
+cursor-keys aliases --install   # per-project aliases, `ck` shortcut, and zsh tab completion (e.g. `cursor-keys open <TAB>`)
 cursor-keys sync                # re-copy main Cursor settings into all profiles (also runs on every `open`)
 
 # companion extension, pick one:

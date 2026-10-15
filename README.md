@@ -102,9 +102,12 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `sync [name]`                                  | Re-copy main Cursor settings into profiles                   |
 | `doctor [name]`                                | Health checks: key row, base URL, subagent overrides         |
 | `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile |
-| `aliases [--install]`                          | Per-project shell aliases                                    |
+| `aliases [--install]`                          | Per-project shell aliases (also `ck` shortcut + tab completion) |
+| `completion`                                   | Print zsh tab completion (auto-sourced by `aliases --install`) |
 | `install-extension`                            | Link the Cursor extension into `~/.cursor/extensions`        |
 | `rm <name> [--delete]`                         | Unregister (optionally delete the profile)                   |
+
+`cursor-keys ls` prints registered project names one per line for scripts and tab completion; it is hidden from `--help`.
 
 ## Config
 

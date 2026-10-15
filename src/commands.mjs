@@ -93,6 +93,10 @@ export async function runCommand(argv) {
       return cmdClone(rest);
     case "rm":
       return cmdRm(rest);
+    case "ls":
+      return cmdLs(rest);
+    case "completion":
+      return cmdCompletion(rest);
     default:
       throw new Error(`Unknown command: ${cmd}. Run cursor-keys --help`);
   }
@@ -569,7 +573,13 @@ async function cmdAliases(args) {
   const lines = names.map(
     (n) => `alias ${sanitizeAlias(n)}='cursor-keys open ${shellEscapeName(n)}'`,
   );
-  const block = [ZSHRC_MARKER_START, ...lines, ZSHRC_MARKER_END].join("\n");
+  const block = [
+    ZSHRC_MARKER_START,
+    "alias ck='cursor-keys'",
+    'eval "$(cursor-keys completion)"   # tab completion',
+    ...lines,
+    ZSHRC_MARKER_END,
+  ].join("\n");
 
   if (!flags.install) {
     console.log(block);
@@ -591,6 +601,13 @@ async function cmdAliases(args) {
   }
   fs.writeFileSync(zshrc, content, "utf8");
   console.log(ok(`Updated ${zshrc}`));
+  if (!content.includes("compinit")) {
+    console.log(
+      warn(
+        "Note: `compinit` not found in ~/.zshrc. Tab completion needs it; add this line: autoload -Uz compinit && compinit",
+      ),
+    );
+  }
 }
 
 function sanitizeAlias(name) {
@@ -599,6 +616,54 @@ function sanitizeAlias(name) {
 
 function shellEscapeName(name) {
   return name.replace(/'/g, `'\\''`);
+}
+
+const COMPLETION_COMMANDS =
+  "init add clone set-key open status current config sync doctor aliases wrap install-extension completion ls rm";
+
+/**
+ * Pure builder for the zsh completion script. Sourced via
+ * `eval "$(cursor-keys completion)"` from the aliases/wrap zshrc blocks,
+ * so updates ship with `npm update` and never go stale on disk.
+ */
+export function completionScript() {
+  return `#compdef cursor-keys ckeys ck
+_cursor_keys() {
+  local -a projects
+  if (( CURRENT == 3 )) && [[ \${words[2]} == (open|clone|set-key|doctor|sync|rm) ]]; then
+    projects=(\${(f)"$(cursor-keys ls 2>/dev/null)"})
+    _describe 'project' projects
+  else
+    _arguments '1:command:(${COMPLETION_COMMANDS})'
+  fi
+}
+compdef _cursor_keys cursor-keys ckeys ck
+`;
+}
+
+function cmdCompletion(args) {
+  const { flags } = parseFlags(args);
+  if (flags.help) {
+    console.log("Usage: cursor-keys completion");
+    console.log("Prints the zsh tab completion script to stdout.");
+    console.log("Auto-sourced by `cursor-keys aliases --install`; no separate install needed.");
+    return;
+  }
+  process.stdout.write(completionScript());
+}
+
+/**
+ * Hidden command: bare project names, one per line, for completion/scripts.
+ */
+function cmdLs(args) {
+  const { flags } = parseFlags(args);
+  if (flags.help) {
+    console.log("Usage: cursor-keys ls");
+    console.log("Prints registered project names, one per line (for scripts and tab completion).");
+    return;
+  }
+  const config = loadConfig();
+  console.log(Object.keys(config.projects).sort().join("\n"));
 }
 
 function installZshrcBlock(startMarker, endMarker, block) {
@@ -615,6 +680,13 @@ function installZshrcBlock(startMarker, endMarker, block) {
     content = content.trimEnd() + "\n\n" + block + "\n";
   }
   fs.writeFileSync(zshrc, content, "utf8");
+  if (!content.includes("compinit")) {
+    console.log(
+      warn(
+        "Note: `compinit` not found in ~/.zshrc. Tab completion needs it; add this line: autoload -Uz compinit && compinit",
+      ),
+    );
+  }
   return zshrc;
 }
 

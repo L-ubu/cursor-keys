@@ -1,6 +1,6 @@
 {
   "name": "cursor-keys",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Per-project Cursor profiles so each window uses the correct BYOK API key. Zero dependencies.",
   "type": "module",
   "bin": {
@@ -13,7 +13,8 @@
   "files": [
     "bin",
     "src",
-    "extension"
+    "extension",
+    "scripts"
   ],
   "keywords": [
     "cursor",
@@ -31,6 +32,7 @@
   },
   "scripts": {
     "test": "node --test",
+    "postinstall": "node scripts/postinstall.mjs",
     "prepublishOnly": "npm test"
   }
 }
