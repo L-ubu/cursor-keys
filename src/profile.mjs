@@ -143,21 +143,50 @@ export function needsFirstRunChecklist(profileDir) {
   return !fs.existsSync(path.join(profileDir, SETUP_MARKER));
 }
 
+/**
+ * @param {string} projectName
+ * @param {string} baseUrl
+ * @param {string} platform Node process.platform
+ */
+export function buildFirstRunChecklist(
+  projectName,
+  baseUrl = "https://gateway.example.com/v1",
+  platform = process.platform,
+) {
+  if (platform === "darwin") {
+    return `
+First-time setup for "${projectName}" · copy-paste in order:
+
+  cursor-keys clone ${projectName}    # inherit sign-in, settings, model config from main Cursor
+  cursor-keys set-key ${projectName}  # inject the project API key (encrypted, hidden prompt)
+  cursor-keys doctor ${projectName}   # verify the profile
+
+Manual alternative: Cursor Settings → Models → API keys, paste the key under
+OpenAI API Key, enable "Override OpenAI Base URL" with: ${baseUrl}
+
+Already inside this profile's window? Close it before running clone or set-key.
+`;
+  }
+
+  return `
+First-time setup for "${projectName}" · copy-paste in order:
+
+  cursor-keys clone ${projectName}    # inherit sign-in, settings, model config from main Cursor
+  cursor-keys open ${projectName}     # open once so Cursor creates its state
+  cursor-keys doctor ${projectName}   # verify the profile
+
+Then in that window: Cursor Settings → Models → API keys, paste the key under
+OpenAI API Key, enable "Override OpenAI Base URL" with: ${baseUrl}
+
+Already inside this profile's window? Close it before running clone.
+`;
+}
+
 export function printFirstRunChecklist(
   projectName,
   baseUrl = "https://gateway.example.com/v1",
 ) {
-  console.log(`
-First-time setup for "${projectName}" in this Cursor profile:
-
-  1. Cursor Settings → Models → API keys
-  2. Paste your project API key under OpenAI API Key (or run: cursor-keys set-key ${projectName})
-  3. Enable "Use OpenAI API Key" and "Override OpenAI Base URL"
-  4. Base URL: ${baseUrl}
-  5. Add your gateway models and disable models you do not use
-
-Then run: cursor-keys doctor ${projectName}
-`);
+  console.log(buildFirstRunChecklist(projectName, baseUrl, process.platform));
 }
 
 export function createProfile({ profileDir, projectName, color, cloneFrom }) {
