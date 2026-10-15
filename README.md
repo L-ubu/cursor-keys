@@ -48,6 +48,8 @@ npm install -g cursor-keys
 
 Requires Node ≥18, the Cursor CLI (`Shell Command: Install 'cursor' in PATH`), and sqlite3 (preinstalled on macOS). Key injection is macOS-only; everything else is cross-platform shaped.
 
+On global install, the companion Cursor extension is linked into `~/.cursor/extensions` automatically and a one-time hint prints (opt out of both: `CURSOR_KEYS_NO_POSTINSTALL=1`). Restart Cursor, then `Cmd+Shift+P` → "cursor-keys: Open Project...".
+
 ## Quick start
 
 ```bash
@@ -69,8 +71,8 @@ One-time extras for the full experience:
 
 ```bash
 cursor-keys wrap --install        # plain `cursor <path>` auto-picks the profile
-cursor-keys aliases --install     # per-project shell aliases
-cursor-keys install-extension     # status bar indicator + wrong-window guard
+cursor-keys aliases --install     # per-project aliases, `ck` shortcut, zsh tab completion
+cursor-keys install-extension     # status bar + wrong-window guard (auto-linked on global npm install)
 ```
 
 ## How it works
@@ -104,14 +106,14 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile |
 | `aliases [--install]`                          | Per-project shell aliases (also `ck` shortcut + tab completion) |
 | `completion`                                   | Print zsh tab completion (auto-sourced by `aliases --install`) |
-| `install-extension`                            | Link the Cursor extension into `~/.cursor/extensions`        |
+| `install-extension`                            | Link the Cursor extension (auto-linked on global npm install) |
 | `rm <name> [--delete]`                         | Unregister (optionally delete the profile)                   |
 
 `cursor-keys ls` prints registered project names one per line for scripts and tab completion; it is hidden from `--help`.
 
 ## Config
 
-`~/.config/cursor-keys/config.json`:
+`~/.config/cursor-keys/config.json` (writes are atomic and merge-on-save, so overlapping runs never clobber registrations):
 
 ```json
 {

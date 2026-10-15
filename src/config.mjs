@@ -8,6 +8,15 @@ export const DEFAULT_CONFIG_DIR = path.join(
   "cursor-keys",
 );
 export const CONFIG_FILE = path.join(DEFAULT_CONFIG_DIR, "config.json");
+
+/**
+ * Resolved at call time so tests and scripts can point cursor-keys at a
+ * scratch config via CURSOR_KEYS_CONFIG_FILE.
+ */
+function configFilePath() {
+  const override = process.env.CURSOR_KEYS_CONFIG_FILE;
+  return override ? expandHome(override) : CONFIG_FILE;
+}
 export const DEFAULT_PROFILES_ROOT = path.join(
   os.homedir(),
   ".cursor-profiles",
@@ -40,23 +49,36 @@ export function defaultConfig() {
 }
 
 export function loadConfig() {
-  if (!fs.existsSync(CONFIG_FILE)) {
+  const file = configFilePath();
+  if (!fs.existsSync(file)) {
     return defaultConfig();
   }
-  const raw = fs.readFileSync(CONFIG_FILE, "utf8");
+  const raw = fs.readFileSync(file, "utf8");
   const data = JSON.parse(raw);
   return validateConfig(data);
 }
 
 export function saveConfig(config) {
   const validated = validateConfig(config);
-  fs.mkdirSync(DEFAULT_CONFIG_DIR, { recursive: true });
-  fs.writeFileSync(
-    CONFIG_FILE,
-    JSON.stringify(validated, null, 2) + "\n",
-    "utf8",
-  );
+  const file = configFilePath();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  // Atomic write: a crash or concurrent reader never sees a torn file.
+  const tmp = `${file}.tmp-${process.pid}`;
+  fs.writeFileSync(tmp, JSON.stringify(validated, null, 2) + "\n", "utf8");
+  fs.renameSync(tmp, file);
   return validated;
+}
+
+/**
+ * Load fresh, mutate, save: the only safe way to change config. Keeps the
+ * lost-update window (two concurrent runs dropping each other's projects)
+ * down to the few ms inside this function instead of a whole command run.
+ * @param {(config: ReturnType<typeof loadConfig>) => void} mutate
+ */
+export function updateConfig(mutate) {
+  const config = loadConfig();
+  mutate(config);
+  return saveConfig(config);
 }
 
 /**

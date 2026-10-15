@@ -66,7 +66,8 @@ cursor-keys wrap --install      # plain `cursor <path>` auto-picks the right pro
 cursor-keys aliases --install   # per-project aliases, `ck` shortcut, and zsh tab completion (e.g. `cursor-keys open <TAB>`)
 cursor-keys sync                # re-copy main Cursor settings into all profiles (also runs on every `open`)
 
-# companion extension, pick one:
+# companion extension: auto-linked into Cursor on global npm install (restart Cursor after).
+# Manual alternatives:
 #   a) Cursor Extensions panel -> search "cursor-keys" -> Install (Open VSX marketplace)
 #   b) cursor-keys install-extension   (links the extension from this clone, dev mode)
 ```

@@ -16,7 +16,7 @@ import {
   loadConfig,
   pickColorForName,
   pickUnusedColor,
-  saveConfig,
+  updateConfig,
   profileStateDb,
 } from "./config.mjs";
 import {
@@ -238,8 +238,9 @@ async function cmdConfig(args) {
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
     throw new Error(`baseUrl must start with http(s)://: ${value}`);
   }
-  config.baseUrl = value;
-  saveConfig(config);
+  updateConfig((c) => {
+    c.baseUrl = value;
+  });
   console.log(ok(`baseUrl set: ${value}`));
   console.log(`${dim}doctor verifies this per profile.${reset}`);
 }
@@ -304,20 +305,20 @@ async function cmdInit(args) {
     }
   }
 
-  const config = loadConfig();
-  for (const repo of selected) {
-    const name = path.basename(repo);
-    if (config.projects[name]) {
-      console.log(warn(`Skip ${name} (already registered)`));
-      continue;
+  updateConfig((config) => {
+    for (const repo of selected) {
+      const name = path.basename(repo);
+      if (config.projects[name]) {
+        console.log(warn(`Skip ${name} (already registered)`));
+        continue;
+      }
+      config.projects[name] = {
+        path: collapseHome(repo),
+        color: pickColorForName(name),
+      };
+      console.log(ok(`Registered ${name}`));
     }
-    config.projects[name] = {
-      path: collapseHome(repo),
-      color: pickColorForName(name),
-    };
-    console.log(ok(`Registered ${name}`));
-  }
-  saveConfig(config);
+  });
   console.log(
     `\nNext: cursor-keys add <name> --clone main   (creates profile + copies main Cursor settings)`,
   );
@@ -360,10 +361,11 @@ async function cmdAdd(args) {
     flags.color ||
     config.projects[name]?.color ||
     pickUnusedColor(name, usedColors);
-  config.projects[name] = { path: collapseHome(repoPath), color };
-  saveConfig(config);
+  const saved = updateConfig((c) => {
+    c.projects[name] = { path: collapseHome(repoPath), color };
+  });
 
-  const project = getProject(config, name);
+  const project = getProject(saved, name);
   if (!project) throw new Error("Failed to resolve project");
 
   let cloneFrom = null;
@@ -371,7 +373,7 @@ async function cmdAdd(args) {
     if (flags.clone === "main") {
       cloneFrom = mainCursorProfileRoot();
     } else {
-      const donor = getProject(config, flags.clone);
+      const donor = getProject(saved, flags.clone);
       if (!donor) throw new Error(`Unknown clone donor: ${flags.clone}`);
       cloneFrom = donor.profileDir;
     }
@@ -601,10 +603,10 @@ async function cmdAliases(args) {
   }
   fs.writeFileSync(zshrc, content, "utf8");
   console.log(ok(`Updated ${zshrc}`));
-  if (!content.includes("compinit")) {
+  if (!compinitLikelyConfigured(content)) {
     console.log(
       warn(
-        "Note: `compinit` not found in ~/.zshrc. Tab completion needs it; add this line: autoload -Uz compinit && compinit",
+        "Note: tab completion needs compinit. If `cursor-keys open <TAB>` does nothing after sourcing ~/.zshrc, add: autoload -Uz compinit && compinit",
       ),
     );
   }
@@ -612,6 +614,22 @@ async function cmdAliases(args) {
 
 function sanitizeAlias(name) {
   return name.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+const COMPINIT_HINT_RE = /compinit|oh-my-zsh|prezto|zinit|antigen|zplug|zimfw/;
+
+/**
+ * Best-effort check that the user's zsh setup loads compinit. Frameworks
+ * (oh-my-zsh, prezto, zinit, ...) run it from sourced files rather than
+ * ~/.zshrc itself, and Warp injects it via shell integration, so a plain
+ * text grep of ~/.zshrc alone gives false positives. Exported for tests.
+ */
+export function compinitLikelyConfigured(
+  zshrcContent,
+  termProgram = process.env.TERM_PROGRAM,
+) {
+  if (COMPINIT_HINT_RE.test(zshrcContent)) return true;
+  return termProgram === "WarpTerminal";
 }
 
 function shellEscapeName(name) {
@@ -680,10 +698,10 @@ function installZshrcBlock(startMarker, endMarker, block) {
     content = content.trimEnd() + "\n\n" + block + "\n";
   }
   fs.writeFileSync(zshrc, content, "utf8");
-  if (!content.includes("compinit")) {
+  if (!compinitLikelyConfigured(content)) {
     console.log(
       warn(
-        "Note: `compinit` not found in ~/.zshrc. Tab completion needs it; add this line: autoload -Uz compinit && compinit",
+        "Note: tab completion needs compinit. If `cursor-keys open <TAB>` does nothing after sourcing ~/.zshrc, add: autoload -Uz compinit && compinit",
       ),
     );
   }
@@ -807,12 +825,17 @@ async function cmdInstallExtension() {
     "..",
   );
   const src = path.join(repoRoot, "extension");
-  if (!fs.existsSync(path.join(src, "package.json"))) {
+  const extPkgPath = path.join(src, "package.json");
+  if (!fs.existsSync(extPkgPath)) {
     throw new Error(`Extension source missing: ${src}`);
   }
+  const extPkg = JSON.parse(fs.readFileSync(extPkgPath, "utf8"));
   const extDir = path.join(os.homedir(), ".cursor", "extensions");
   fs.mkdirSync(extDir, { recursive: true });
-  const target = path.join(extDir, "lubu.cursor-keys-1.0.0");
+  const target = path.join(
+    extDir,
+    `${extPkg.publisher || "lubu"}.${extPkg.name}-${extPkg.version}`,
+  );
   fs.rmSync(target, { recursive: true, force: true });
   fs.symlinkSync(src, target, "dir");
   console.log(ok(`Extension linked: ${target}`));
@@ -900,8 +923,9 @@ async function cmdRm(args) {
   if (!config.projects[name]) throw new Error(`Unknown project: ${name}`);
 
   const p = getProject(config, name);
-  delete config.projects[name];
-  saveConfig(config);
+  updateConfig((c) => {
+    delete c.projects[name];
+  });
   console.log(ok(`Removed ${name} from config`));
 
   if (flags.delete && p) {

@@ -565,8 +565,9 @@
       <section id="commands">
         <h2><span class="n">03</span>Commands</h2>
         <p class="lede">
-          One binary, two names: <code>cursor-keys</code> and
-          <code>ckeys</code>.
+          One binary, three names: <code>cursor-keys</code>,
+          <code>ckeys</code>, and the <code>ck</code> alias from
+          <code>aliases --install</code>.
         </p>
 
         <table>
@@ -618,8 +619,18 @@
               </td>
             </tr>
             <tr>
+              <td><code>aliases --install</code></td>
+              <td>
+                Per-project aliases, the <code>ck</code> shortcut, and zsh tab
+                completion
+              </td>
+            </tr>
+            <tr>
               <td><code>install-extension</code></td>
-              <td>Status bar indicator and wrong-window guard</td>
+              <td>
+                Status bar indicator and wrong-window guard (auto-linked on
+                global npm install)
+              </td>
             </tr>
           </tbody>
         </table>
@@ -630,7 +641,8 @@
         <p class="lede">
           Optional. Lives at <code>~/.config/cursor-keys/config.json</code>. Set
           <code>baseUrl</code> to your LiteLLM, Vercel AI Gateway, or other
-          OpenAI-compatible endpoint.
+          OpenAI-compatible endpoint. Writes are atomic and merge-on-save, so
+          overlapping runs never clobber registrations.
         </p>
 
         <pre class="codeblock">
