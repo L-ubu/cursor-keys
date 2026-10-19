@@ -588,8 +588,9 @@
             <h3><i>◆</i> Clone your setup</h3>
             <p>
               <code>clone</code> copies sign-in, theme, and model config from
-              your main Cursor. New profiles open ready instead of repeating
-              onboarding.
+              your main Cursor, and scrubs donor secrets (API keys, MCP
+              tokens) from the copy. New profiles open ready instead of
+              repeating onboarding.
             </p>
           </div>
           <div class="card">
@@ -610,8 +611,9 @@
           <div class="card">
             <h3><i>◆</i> Zero dependencies</h3>
             <p>
-              Plain Node ≥18 and sqlite3. Nothing to audit, nothing to break on
-              npm supply-chain day.
+              Plain Node ≥18 and sqlite3, no install scripts, releases signed
+              with npm provenance. Nothing to audit, nothing to break on npm
+              supply-chain day.
             </p>
           </div>
         </div>
@@ -687,8 +689,8 @@
             <tr>
               <td><code>install-extension</code></td>
               <td>
-                Status bar indicator and wrong-window guard (auto-linked on
-                global npm install)
+                Link the status bar indicator and wrong-window guard into
+                Cursor
               </td>
             </tr>
           </tbody>
