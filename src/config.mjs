@@ -48,7 +48,9 @@ export function collapseHome(p) {
 export function defaultConfig() {
   return {
     profilesRoot: collapseHome(DEFAULT_PROFILES_ROOT),
-    baseUrl: "https://connect.iobonzai.com/cursor",
+    // No built-in gateway URL: every install sets its own via
+    // `cursor-keys config baseUrl <url>`.
+    baseUrl: "",
     projects: {},
   };
 }
@@ -97,10 +99,7 @@ export function validateConfig(data) {
     typeof data.profilesRoot === "string"
       ? data.profilesRoot
       : collapseHome(DEFAULT_PROFILES_ROOT);
-  const baseUrl =
-    typeof data.baseUrl === "string" && data.baseUrl
-      ? data.baseUrl
-      : "https://connect.iobonzai.com/cursor";
+  const baseUrl = typeof data.baseUrl === "string" ? data.baseUrl : "";
   const projects = {};
   if (data.projects && typeof data.projects === "object") {
     for (const [name, entry] of Object.entries(data.projects)) {
@@ -120,7 +119,7 @@ export function validateConfig(data) {
   return { profilesRoot, baseUrl, projects };
 }
 
-/** "https://connect.iobonzai.com/cursor" -> "connect.iobonzai.com/cursor" */
+/** "https://gateway.example.com/v1" -> "gateway.example.com/v1" */
 export function baseUrlFragment(config) {
   return String(config.baseUrl || "").replace(/^https?:\/\//, "");
 }

@@ -101,10 +101,13 @@ describe("config get", () => {
   });
 
   it("works on defaultConfig when no config file exists", () => {
-    assert.equal(
-      getConfigValue(defaultConfig(), "baseUrl"),
-      "https://connect.iobonzai.com/cursor",
-    );
+    assert.equal(getConfigValue(defaultConfig(), "baseUrl"), "");
+  });
+
+  it("ships no built-in gateway URL (set your own via config baseUrl)", () => {
+    assert.equal(defaultConfig().baseUrl, "");
+    const cfg = validateConfig({ projects: {} });
+    assert.equal(cfg.baseUrl, "");
   });
 
   it("throws on unknown key", () => {

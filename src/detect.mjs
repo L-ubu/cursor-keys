@@ -166,7 +166,8 @@ export function stateDbKeysLike(stateDbPath, likePattern) {
 }
 
 /**
- * Check if Bonzai base URL appears in any ItemTable value (substring, no key dump)
+ * Check if a URL fragment (e.g. the configured gateway base URL) appears in
+ * any ItemTable value (substring, no key dump)
  * @param {string} stateDbPath
  * @param {string} urlFragment
  */
@@ -211,4 +212,3 @@ function shellQuote(s) {
 
 export const SECRET_OPENAI_KEY = "secret://cursorAuth/openAIKey";
 export const SUBAGENT_OVERRIDES_KEY = "cursor/subagentModelOverrides";
-export const BONZAI_BASE_URL_FRAGMENT = "connect.iobonzai.com/cursor";
