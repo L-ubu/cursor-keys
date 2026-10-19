@@ -28,6 +28,9 @@ function printHelp() {
     "  set-key <name>              Inject the project API key (encrypted)",
   );
   console.log(
+    "  color <name> [#hex]         Show or set the project title bar color",
+  );
+  console.log(
     "  open [name]                 Open Cursor with this project's profile",
   );
   console.log(

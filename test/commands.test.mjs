@@ -11,11 +11,11 @@ describe("completionScript", () => {
   });
 
   it("completes the full command list via _arguments", () => {
-    assert.match(script, /_arguments '1:command:\(init add clone set-key open status current config sync doctor aliases wrap install-extension completion ls rm\)'/);
+    assert.match(script, /_arguments '1:command:\(init add clone set-key color open status current config sync doctor aliases wrap install-extension completion ls rm\)'/);
   });
 
   it("completes project names for the project-scoped commands", () => {
-    assert.match(script, /open\|clone\|set-key\|doctor\|sync\|rm/);
+    assert.match(script, /open\|clone\|set-key\|color\|doctor\|sync\|rm/);
     assert.match(script, /cursor-keys ls 2>\/dev\/null/);
   });
 });

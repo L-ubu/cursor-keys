@@ -91,23 +91,24 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 
 ## Commands
 
-| Command                                        | What it does                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------ |
-| `init [--root DIR] [--all]`                    | Discover git repos and register them                         |
-| `add <name> [--path] [--color] [--clone main]` | Create a project profile                                     |
-| `clone <name> [--from main]`                   | Copy sign-in + settings + model config from a donor profile  |
-| `set-key <name> [--key sk-...]`                | Inject the project API key (encrypted, verified)             |
-| `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)        |
-| `status`                                       | Projects, colors, running windows, key configured            |
-| `current`                                      | Mapping for the current directory                            |
-| `config [get <key> · baseUrl [URL]]`           | Show summary, print one value, or set the gateway base URL   |
-| `sync [name]`                                  | Re-copy main Cursor settings into profiles                   |
-| `doctor [name]`                                | Health checks: key row, base URL, subagent overrides         |
-| `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile |
+| Command                                        | What it does                                                    |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| `init [--root DIR] [--all]`                    | Discover git repos and register them                            |
+| `add <name> [--path] [--color] [--clone main]` | Create a project profile                                        |
+| `clone <name> [--from main]`                   | Copy sign-in + settings + model config from a donor profile     |
+| `set-key <name> [--key sk-...]`                | Inject the project API key (encrypted, verified)                |
+| `color <name> [#hex]`                          | Show or set the project title bar color                         |
+| `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)           |
+| `status`                                       | Projects, colors, running windows, key configured               |
+| `current`                                      | Mapping for the current directory                               |
+| `config [get <key> · baseUrl [URL]]`           | Show summary, print one value, or set the gateway base URL      |
+| `sync [name]`                                  | Re-copy main Cursor settings into profiles                      |
+| `doctor [name]`                                | Health checks: key row, base URL, subagent overrides            |
+| `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile    |
 | `aliases [--install]`                          | Per-project shell aliases (also `ck` shortcut + tab completion) |
-| `completion`                                   | Print zsh tab completion (auto-sourced by `aliases --install`) |
-| `install-extension`                            | Link the Cursor extension (auto-linked on global npm install) |
-| `rm <name> [--delete]`                         | Unregister (optionally delete the profile)                   |
+| `completion`                                   | Print zsh tab completion (auto-sourced by `aliases --install`)  |
+| `install-extension`                            | Link the Cursor extension (auto-linked on global npm install)   |
+| `rm <name> [--delete]`                         | Unregister (optionally delete the profile)                      |
 
 `cursor-keys ls` prints registered project names one per line for scripts and tab completion; it is hidden from `--help`.
 

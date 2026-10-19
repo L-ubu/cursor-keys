@@ -13,6 +13,7 @@ import {
   findProjectByPath,
   getConfigValue,
   getProject,
+  isHexColor,
   loadConfig,
   pickColorForName,
   pickUnusedColor,
@@ -89,6 +90,8 @@ export async function runCommand(argv) {
       return cmdInstallExtension(rest);
     case "set-key":
       return cmdSetKey(rest);
+    case "color":
+      return cmdColor(rest);
     case "clone":
       return cmdClone(rest);
     case "rm":
@@ -637,7 +640,7 @@ function shellEscapeName(name) {
 }
 
 const COMPLETION_COMMANDS =
-  "init add clone set-key open status current config sync doctor aliases wrap install-extension completion ls rm";
+  "init add clone set-key color open status current config sync doctor aliases wrap install-extension completion ls rm";
 
 /**
  * Pure builder for the zsh completion script. Sourced via
@@ -648,7 +651,7 @@ export function completionScript() {
   return `#compdef cursor-keys ckeys ck
 _cursor_keys() {
   local -a projects
-  if (( CURRENT == 3 )) && [[ \${words[2]} == (open|clone|set-key|doctor|sync|rm) ]]; then
+  if (( CURRENT == 3 )) && [[ \${words[2]} == (open|clone|set-key|color|doctor|sync|rm) ]]; then
     projects=(\${(f)"$(cursor-keys ls 2>/dev/null)"})
     _describe 'project' projects
   else
@@ -841,6 +844,39 @@ async function cmdInstallExtension() {
   console.log(ok(`Extension linked: ${target}`));
   console.log("Restart any open Cursor windows to load it.");
   console.log(`Look for ${bold}$(key) <project>${reset} in the status bar.`);
+}
+
+async function cmdColor(args) {
+  const { flags, positional } = parseFlags(args);
+  if (flags.help) {
+    console.log("Usage: cursor-keys color <name> [#RRGGBB]");
+    console.log("Show or set the project's title bar color.");
+    return;
+  }
+  const name = positional[0];
+  if (!name) throw new Error("Usage: cursor-keys color <name> [#RRGGBB]");
+  const config = loadConfig();
+  const project = getProject(config, name);
+  if (!project) throw new Error(`Unknown project: ${name}. Run cursor-keys init or add.`);
+
+  const hex = positional[1];
+  if (!hex) {
+    console.log(`${blockSwatch(project.color)} ${project.color}`);
+    return;
+  }
+  if (!isHexColor(hex)) {
+    throw new Error(`Invalid color: ${hex} (expected #RRGGBB, e.g. #852e00)`);
+  }
+
+  updateConfig((c) => {
+    if (!c.projects[name]) throw new Error(`Unknown project: ${name}`);
+    c.projects[name].color = hex;
+  });
+  if (fs.existsSync(project.profileDir)) {
+    writeProfileSettings(project.profileDir, name, hex);
+  }
+  console.log(ok(`Color for ${name}: `) + `${blockSwatch(hex)} ${hex}`);
+  console.log(`${dim}Open Cursor windows reload settings automatically.${reset}`);
 }
 
 function promptHidden(question) {

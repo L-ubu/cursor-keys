@@ -6,6 +6,7 @@ import {
   expandHome,
   findProjectByPath,
   getConfigValue,
+  isHexColor,
   pickColorForName,
   pickUnusedColor,
   validateConfig,
@@ -40,6 +41,16 @@ describe("config", () => {
 
   it("pickUnusedColor keeps preferred color when free", () => {
     assert.equal(pickUnusedColor("bucx", []), pickColorForName("bucx"));
+  });
+
+  it("isHexColor accepts #RRGGBB only", () => {
+    assert.equal(isHexColor("#852e00"), true);
+    assert.equal(isHexColor("#852E00"), true);
+    assert.equal(isHexColor("852e00"), false);
+    assert.equal(isHexColor("#852e0"), false);
+    assert.equal(isHexColor("#852e000"), false);
+    assert.equal(isHexColor(""), false);
+    assert.equal(isHexColor(undefined), false);
   });
 
   it("pickUnusedColor avoids collision", () => {

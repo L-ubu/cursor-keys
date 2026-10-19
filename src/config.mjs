@@ -24,6 +24,11 @@ export const DEFAULT_PROFILES_ROOT = path.join(
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
+/** @param {unknown} s */
+export function isHexColor(s) {
+  return typeof s === "string" && HEX_COLOR.test(s);
+}
+
 /** @param {string} p */
 export function expandHome(p) {
   if (!p || typeof p !== "string") return p;
