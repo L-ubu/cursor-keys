@@ -215,7 +215,9 @@ async function cmdConfig(args) {
     console.log(
       `${bold}Config${reset} ${dim}(${collapseHome(CONFIG_FILE)})${reset}`,
     );
-    console.log(`  baseUrl:      ${config.baseUrl}`);
+    console.log(
+      `  baseUrl:      ${config.baseUrl || `${dim}(not set: cursor-keys config baseUrl <url>)${reset}`}`,
+    );
     console.log(`  profilesRoot: ${config.profilesRoot}`);
     console.log(
       `  projects:     ${count} registered ${dim}(see cursor-keys status)${reset}`,
@@ -382,7 +384,7 @@ async function cmdAdd(args) {
     }
   }
 
-  createProfile({
+  const { scrubbed } = createProfile({
     profileDir: project.profileDir,
     projectName: name,
     color,
@@ -392,6 +394,11 @@ async function cmdAdd(args) {
   console.log(ok(`Profile ready: ${collapseHome(project.profileDir)}`));
   console.log(`  Repo:  ${collapseHome(project.path)}`);
   console.log(`  Color: ${color} ${blockSwatch(color)}`);
+  if (cloneFrom) {
+    console.log(
+      `  ${dim}Scrubbed ${scrubbed} donor secret row(s) from the clone; sign-in retained.${reset}`,
+    );
+  }
   if (shouldShowFirstRunChecklist(project.profileDir)) {
     printFirstRunChecklist(name, config.baseUrl);
   }
@@ -483,6 +490,26 @@ async function cmdStatus() {
   });
 
   printTable(["Project", "Color", "Windows", "Key", "Repo"], rows);
+  if (!companionExtensionLinked()) {
+    console.log(
+      `\n${dim}Companion extension not linked: cursor-keys install-extension (status bar + wrong-window guard)${reset}`,
+    );
+  }
+}
+
+/**
+ * Best-effort check that the companion extension is linked into Cursor.
+ * Looks for the lubu.cursor-keys-* folder the extension manifest produces.
+ */
+function companionExtensionLinked() {
+  try {
+    const extDir = path.join(os.homedir(), ".cursor", "extensions");
+    return fs
+      .readdirSync(extDir)
+      .some((d) => d.startsWith("lubu.cursor-keys"));
+  } catch {
+    return false;
+  }
 }
 
 async function cmdCurrent() {
@@ -562,9 +589,16 @@ async function cmdDoctor(args) {
       console.log(
         `  ${stateDbHasKey(db, SUBAGENT_OVERRIDES_KEY) ? ok("✓") : warn("✗")} Explore subagent overrides present`,
       );
-      console.log(
-        `  ${stateDbValueContains(db, baseUrlFragment(config)) ? ok("✓") : warn("✗")} Base URL (${baseUrlFragment(config)}) in profile state`,
-      );
+      const fragment = baseUrlFragment(config);
+      if (fragment) {
+        console.log(
+          `  ${stateDbValueContains(db, fragment) ? ok("✓") : warn("✗")} Base URL (${fragment}) in profile state`,
+        );
+      } else {
+        console.log(
+          `  ${dim}- baseUrl not set, skipping gateway check: cursor-keys config baseUrl <url>${reset}`,
+        );
+      }
     } else {
       console.log(`  ${warn("✗")} Open profile once: cursor-keys open ${name}`);
     }
@@ -814,10 +848,13 @@ async function cmdClone(args) {
     donorRoot = donor.profileDir;
   }
 
-  cloneStateDb(donorRoot, project.profileDir);
+  const scrubbed = cloneStateDb(donorRoot, project.profileDir);
   console.log(ok(`Cloned state from ${from} into ${name}`));
   console.log(
-    `${dim}Sign-in, settings, and model config carried over. Now set the project key:${reset}`,
+    `${dim}Scrubbed ${scrubbed} donor secret row(s) from the copy (API keys, MCP OAuth, extension secrets); sign-in retained.${reset}`,
+  );
+  console.log(
+    `${dim}Settings and model config carried over. Now set the project key:${reset}`,
   );
   console.log(`  cursor-keys set-key ${name}`);
 }
@@ -879,6 +916,14 @@ async function cmdColor(args) {
   console.log(`${dim}Open Cursor windows reload settings automatically.${reset}`);
 }
 
+/**
+ * Read the API key from stdin (piped input or `--key -`). Only called when
+ * stdin is not an interactive TTY or the user explicitly asked for stdin.
+ */
+function readStdinKey() {
+  return fs.readFileSync(0, "utf8").trim();
+}
+
 function promptHidden(question) {
   return new Promise((resolve) => {
     const rl = readline.createInterface({
@@ -899,18 +944,22 @@ function promptHidden(question) {
 async function cmdSetKey(args) {
   const { flags, positional } = parseFlags(args);
   if (flags.help) {
-    console.log("Usage: cursor-keys set-key <name> [--key sk-...]");
+    console.log("Usage: cursor-keys set-key <name> [--key -]");
     console.log(
       "Writes the key into the profile's encrypted store (Cursor must",
     );
     console.log(
-      "not have that profile window open). Prompts hidden if --key omitted.",
+      "not have that profile window open). Hidden prompt when interactive;",
     );
+    console.log(
+      "reads stdin when piped or with `--key -`. Avoid inline --key values:",
+    );
+    console.log("they leak into shell history and process lists.");
     return;
   }
   const name = positional[0];
   if (!name)
-    throw new Error("Usage: cursor-keys set-key <name> [--key sk-...]");
+    throw new Error("Usage: cursor-keys set-key <name> [--key -]");
 
   const config = loadConfig();
   const project = getProject(config, name);
@@ -927,7 +976,20 @@ async function cmdSetKey(args) {
   }
 
   let key = flags.key;
-  if (!key) {
+  if (key === "-") {
+    key = readStdinKey();
+  } else if (key) {
+    console.log(
+      warn(
+        "Inline --key exposes the key in shell history and process lists. Prefer the hidden prompt or stdin:",
+      ),
+    );
+    console.log(
+      `  ${dim}op read op://vault/item/password | cursor-keys set-key ${name}${reset}`,
+    );
+  } else if (!process.stdin.isTTY) {
+    key = readStdinKey();
+  } else {
     console.log(
       `\nPaste the API key for ${bold}${name}${reset} below, then press Enter.`,
     );

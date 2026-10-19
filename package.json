@@ -13,8 +13,7 @@
   "files": [
     "bin",
     "src",
-    "extension",
-    "scripts"
+    "extension"
   ],
   "keywords": [
     "cursor",
@@ -32,7 +31,6 @@
   },
   "scripts": {
     "test": "node --test",
-    "postinstall": "node scripts/postinstall.mjs",
     "prepublishOnly": "npm test"
   }
 }

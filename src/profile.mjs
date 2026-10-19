@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -81,8 +81,17 @@ export function symlinkSharedUserFiles(profileDir) {
 }
 
 /**
+ * Row patterns scrubbed from every cloned state DB. Donor secrets (API keys,
+ * MCP OAuth tokens, extension secrets) never propagate into project profiles.
+ * The Cursor sign-in session (cursorAuth/*) intentionally stays: profiles
+ * open signed-in, which is the whole point of clone.
+ */
+export const CLONE_SCRUB_LIKE_PATTERNS = ["secret://%", "mcpOAuth.%"];
+
+/**
  * @param {string} donorProfileDir - main Cursor or another profile root (parent of User)
  * @param {string} targetProfileDir
+ * @returns {number} how many donor secret rows were scrubbed from the copy
  */
 export function cloneStateDb(donorProfileDir, targetProfileDir) {
   const runningProfiles = listRunningCursorProfiles();
@@ -126,6 +135,29 @@ export function cloneStateDb(donorProfileDir, targetProfileDir) {
   execSync(`sqlite3 ${shellQuote(src)} "VACUUM INTO ${shellQuote(dest)}"`, {
     stdio: "ignore",
   });
+
+  return scrubClonedSecrets(dest);
+}
+
+/**
+ * Delete donor secret rows from a freshly cloned state DB (keys only, values
+ * are never read). Returns the number of deleted rows.
+ * @param {string} stateDbPath
+ */
+export function scrubClonedSecrets(stateDbPath) {
+  let scrubbed = 0;
+  for (const pattern of CLONE_SCRUB_LIKE_PATTERNS) {
+    const out = execFileSync(
+      "sqlite3",
+      [
+        stateDbPath,
+        `DELETE FROM ItemTable WHERE key LIKE '${pattern}'; SELECT changes();`,
+      ],
+      { encoding: "utf8" },
+    );
+    scrubbed += parseInt(out.trim(), 10) || 0;
+  }
+  return scrubbed;
 }
 
 function shellQuote(s) {
@@ -150,19 +182,23 @@ export function needsFirstRunChecklist(profileDir) {
  */
 export function buildFirstRunChecklist(
   projectName,
-  baseUrl = "https://gateway.example.com/v1",
+  baseUrl = "",
   platform = process.platform,
 ) {
+  const gateway = baseUrl || "https://gateway.example.com/v1";
+  const gatewayStep = baseUrl
+    ? ""
+    : `  cursor-keys config baseUrl <your-gateway-url>   # one-time, e.g. ${gateway}\n`;
   if (platform === "darwin") {
     return `
 First-time setup for "${projectName}" · copy-paste in order:
 
-  cursor-keys clone ${projectName}    # inherit sign-in, settings, model config from main Cursor
+${gatewayStep}  cursor-keys clone ${projectName}    # inherit sign-in, settings, model config from main Cursor
   cursor-keys set-key ${projectName}  # inject the project API key (encrypted, hidden prompt)
   cursor-keys doctor ${projectName}   # verify the profile
 
 Manual alternative: Cursor Settings → Models → API keys, paste the key under
-OpenAI API Key, enable "Override OpenAI Base URL" with: ${baseUrl}
+OpenAI API Key, enable "Override OpenAI Base URL" with: ${gateway}
 
 Already inside this profile's window? Close it before running clone or set-key.
 `;
@@ -171,12 +207,12 @@ Already inside this profile's window? Close it before running clone or set-key.
   return `
 First-time setup for "${projectName}" · copy-paste in order:
 
-  cursor-keys clone ${projectName}    # inherit sign-in, settings, model config from main Cursor
+${gatewayStep}  cursor-keys clone ${projectName}    # inherit sign-in, settings, model config from main Cursor
   cursor-keys open ${projectName}     # open once so Cursor creates its state
   cursor-keys doctor ${projectName}   # verify the profile
 
 Then in that window: Cursor Settings → Models → API keys, paste the key under
-OpenAI API Key, enable "Override OpenAI Base URL" with: ${baseUrl}
+OpenAI API Key, enable "Override OpenAI Base URL" with: ${gateway}
 
 Already inside this profile's window? Close it before running clone.
 `;
@@ -193,9 +229,11 @@ export function createProfile({ profileDir, projectName, color, cloneFrom }) {
   fs.mkdirSync(profileDir, { recursive: true });
   writeProfileSettings(profileDir, projectName, color);
   symlinkSharedUserFiles(profileDir);
+  let scrubbed = 0;
   if (cloneFrom) {
-    cloneStateDb(cloneFrom, profileDir);
+    scrubbed = cloneStateDb(cloneFrom, profileDir);
   }
+  return { scrubbed };
 }
 
 export function profileIntegrityChecks(profileDir) {

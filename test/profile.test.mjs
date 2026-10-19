@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { buildFirstRunChecklist } from "../src/profile.mjs";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { buildFirstRunChecklist, cloneStateDb } from "../src/profile.mjs";
+import { profileStateDb } from "../src/config.mjs";
+import { hasSqlite3, stateDbKeysLike } from "../src/detect.mjs";
 
 const NAME = "jlr_mss";
 const BASE = "https://gateway.example.com/v1";
@@ -39,5 +45,63 @@ describe("buildFirstRunChecklist", () => {
     const text = buildFirstRunChecklist(NAME, BASE, "linux");
     assert.match(text, /cursor-keys open jlr_mss/);
     assert.doesNotMatch(text, /cursor-keys set-key/);
+  });
+
+  it("empty baseUrl adds the config step and uses a placeholder gateway", () => {
+    const text = buildFirstRunChecklist(NAME, "", "darwin");
+    assert.match(text, /cursor-keys config baseUrl <your-gateway-url>/);
+    assert.match(text, /https:\/\/gateway\.example\.com\/v1/);
+  });
+
+  it("configured baseUrl skips the config step", () => {
+    const text = buildFirstRunChecklist(NAME, BASE, "darwin");
+    assert.doesNotMatch(text, /cursor-keys config baseUrl/);
+  });
+});
+
+describe("cloneStateDb", () => {
+  it("scrubs donor secrets but keeps sign-in and plain settings rows", (t) => {
+    if (!hasSqlite3()) {
+      t.skip("sqlite3 not available");
+      return;
+    }
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cursor-keys-clone-"));
+    try {
+      const donor = path.join(tmp, "donor");
+      const target = path.join(tmp, "target");
+      const donorDbDir = path.join(donor, "User", "globalStorage");
+      fs.mkdirSync(donorDbDir, { recursive: true });
+      const donorDb = path.join(donorDbDir, "state.vscdb");
+      execFileSync("sqlite3", [
+        donorDb,
+        "CREATE TABLE ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);",
+      ]);
+      const rows = {
+        "secret://cursorAuth/openAIKey": "donor-key-blob",
+        'secret://{"extensionId":"some.ext","key":"token"}': "ext-secret-blob",
+        "mcpOAuth.global.abc123": "mcp-oauth-data",
+        "cursorAuth/accessToken": "session-token",
+        "cursorAuth/refreshToken": "session-token",
+        "cursor/subagentModelOverrides": "{}",
+      };
+      for (const [k, v] of Object.entries(rows)) {
+        execFileSync("sqlite3", [
+          donorDb,
+          `INSERT INTO ItemTable (key, value) VALUES ('${k}', '${v}');`,
+        ]);
+      }
+
+      const scrubbed = cloneStateDb(donor, target);
+      assert.equal(scrubbed, 3);
+
+      const keys = stateDbKeysLike(profileStateDb(target), "%").sort();
+      assert.deepEqual(keys, [
+        "cursor/subagentModelOverrides",
+        "cursorAuth/accessToken",
+        "cursorAuth/refreshToken",
+      ]);
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
   });
 });
