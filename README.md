@@ -50,6 +50,22 @@ Requires Node ≥18, the Cursor CLI (`Shell Command: Install 'cursor' in PATH`),
 
 On global install, the companion Cursor extension is linked into `~/.cursor/extensions` automatically and a one-time hint prints (opt out of both: `CURSOR_KEYS_NO_POSTINSTALL=1`). Restart Cursor, then `Cmd+Shift+P` → "cursor-keys: Open Project...".
 
+## No terminal? Let Cursor's agent set it up
+
+Open your project in Cursor, paste this into the agent chat (`Cmd+L`), and it runs the whole setup for you. Your API key goes into a hidden terminal prompt, never into the chat:
+
+```text
+Set up cursor-keys (github.com/L-ubu/cursor-keys) for this project, step by step:
+1. Run `npm install -g cursor-keys`.
+2. Run `cursor-keys config baseUrl <your-gateway-url>` (replace with my gateway URL, e.g. https://gateway.example.com/v1).
+3. Register this workspace: `cursor-keys add <folder-name> --path <this workspace's path>`.
+4. Run `cursor-keys clone <folder-name>` to inherit my Cursor sign-in and settings.
+5. Run `cursor-keys set-key <folder-name>` and ask me to paste the project API key at the hidden terminal prompt. Never write the key into files, chat, or logs.
+6. Run `cursor-keys doctor <folder-name>` and fix what it flags.
+7. Run `cursor-keys aliases --install` and `cursor-keys wrap --install` for the shell extras.
+8. Open the project in its profile with `cursor-keys open <folder-name>`, then explain how I can tell it worked.
+```
+
 ## Quick start
 
 ```bash

@@ -205,6 +205,37 @@
         color: var(--accent);
       }
 
+      .agentprompt {
+        position: relative;
+      }
+      .agentprompt pre {
+        padding-right: 4.5rem;
+      }
+      .agentprompt button {
+        position: absolute;
+        top: 0.6rem;
+        right: 0.6rem;
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.35rem 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 0.45rem;
+        background: var(--panel);
+        color: var(--muted);
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .agentprompt button:hover {
+        color: var(--accent);
+        background: #1a212c;
+      }
+      .agentprompt button.done {
+        color: var(--accent);
+      }
+
       .hero-links {
         font-size: 0.9rem;
         color: var(--dim);
@@ -468,8 +499,9 @@
 
         <p class="hero-links">
           <a href="https://github.com/L-ubu/cursor-keys">GitHub</a>·
-          <a href="#demo">Quick start</a>· <a href="#features">Features</a>·
-          <a href="#commands">Commands</a>· <a href="#config">Config</a>·
+          <a href="#demo">Quick start</a>· <a href="#agent">Agent setup</a>·
+          <a href="#features">Features</a>· <a href="#commands">Commands</a>·
+          <a href="#config">Config</a>·
           <a href="https://l-ubu.github.io/">All tools</a>
         </p>
       </header>
@@ -509,8 +541,31 @@
         </div>
       </section>
 
+      <section id="agent">
+        <h2><span class="n">02</span>Or let Cursor's agent set it up</h2>
+        <p class="lede">
+          No terminal experience needed. Open your project in Cursor, paste
+          this into the agent chat (<code>Cmd+L</code>), and it runs the whole
+          setup. Your API key goes into a hidden terminal prompt, never into
+          the chat.
+        </p>
+
+        <div class="agentprompt">
+          <pre class="codeblock" id="agent-prompt">Set up cursor-keys (github.com/L-ubu/cursor-keys) for this project, step by step:
+1. Run `npm install -g cursor-keys`.
+2. Run `cursor-keys config baseUrl &lt;your-gateway-url&gt;` (replace with my gateway URL, e.g. https://gateway.example.com/v1).
+3. Register this workspace: `cursor-keys add &lt;folder-name&gt; --path &lt;this workspace's path&gt;`.
+4. Run `cursor-keys clone &lt;folder-name&gt;` to inherit my Cursor sign-in and settings.
+5. Run `cursor-keys set-key &lt;folder-name&gt;` and ask me to paste the project API key at the hidden terminal prompt. Never write the key into files, chat, or logs.
+6. Run `cursor-keys doctor &lt;folder-name&gt;` and fix what it flags.
+7. Run `cursor-keys aliases --install` and `cursor-keys wrap --install` for the shell extras.
+8. Open the project in its profile with `cursor-keys open &lt;folder-name&gt;`, then explain how I can tell it worked.</pre>
+          <button id="copy-prompt" type="button">Copy</button>
+        </div>
+      </section>
+
       <section id="features">
-        <h2><span class="n">02</span>What you get</h2>
+        <h2><span class="n">03</span>What you get</h2>
 
         <div class="grid">
           <div class="card">
@@ -563,7 +618,7 @@
       </section>
 
       <section id="commands">
-        <h2><span class="n">03</span>Commands</h2>
+        <h2><span class="n">04</span>Commands</h2>
         <p class="lede">
           One binary, three names: <code>cursor-keys</code>,
           <code>ckeys</code>, and the <code>ck</code> alias from
@@ -641,7 +696,7 @@
       </section>
 
       <section id="config">
-        <h2><span class="n">04</span>Config</h2>
+        <h2><span class="n">05</span>Config</h2>
         <p class="lede">
           Optional. Lives at <code>~/.config/cursor-keys/config.json</code>. Set
           <code>baseUrl</code> to your LiteLLM, Vercel AI Gateway, or other
@@ -667,7 +722,7 @@
       </section>
 
       <section id="why">
-        <h2><span class="n">05</span>Why</h2>
+        <h2><span class="n">06</span>Why</h2>
 
         <div class="reason">
           <h3>Keys are profile-global, work is per-project</h3>
@@ -711,6 +766,18 @@
           this.classList.remove("done");
         }, 1500);
       });
+      document
+        .getElementById("copy-prompt")
+        .addEventListener("click", function () {
+          const text = document.getElementById("agent-prompt").textContent;
+          navigator.clipboard.writeText(text);
+          this.textContent = "Copied!";
+          this.classList.add("done");
+          setTimeout(() => {
+            this.textContent = "Copy";
+            this.classList.remove("done");
+          }, 1500);
+        });
     </script>
   </body>
 </html>
