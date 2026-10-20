@@ -48,7 +48,13 @@ npm install -g cursor-keys
 
 Requires Node ≥18, the Cursor CLI (`Shell Command: Install 'cursor' in PATH`), and sqlite3 (preinstalled on macOS). Key injection is macOS-only; everything else is cross-platform shaped.
 
-On global install, the companion Cursor extension is linked into `~/.cursor/extensions` automatically and a one-time hint prints (opt out of both: `CURSOR_KEYS_NO_POSTINSTALL=1`). Restart Cursor, then `Cmd+Shift+P` → "cursor-keys: Open Project...".
+The package runs **no install scripts** (`ignore-scripts=true` safe). Link the companion extension once yourself:
+
+```bash
+cursor-keys install-extension   # or install "cursor-keys" from the Open VSX marketplace in Cursor
+```
+
+Restart Cursor, then `Cmd+Shift+P` → "cursor-keys: Open Project...".
 
 ## No terminal? Let Cursor's agent set it up
 
@@ -88,7 +94,7 @@ One-time extras for the full experience:
 ```bash
 cursor-keys wrap --install        # plain `cursor <path>` auto-picks the profile
 cursor-keys aliases --install     # per-project aliases, `ck` shortcut, zsh tab completion
-cursor-keys install-extension     # status bar + wrong-window guard (auto-linked on global npm install)
+cursor-keys install-extension     # status bar + wrong-window guard
 ```
 
 ## How it works
@@ -97,7 +103,7 @@ One window, one profile, one key. Each project gets an isolated `--user-data-dir
 
 Settings flow one way, main to profiles: `sync` re-copies your main `settings.json` into every profile and re-applies that profile's title bar color on top. `open` does this automatically before every launch, and open windows hot-reload the file, so tweaks in your main Cursor show up everywhere. Changes made inside a profile window are overwritten on the next sync.
 
-`clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config. `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" macOS Keychain item) and writes it into the profile's secret store, round-trip verified. macOS asks for Keychain permission once; click Always Allow.
+`clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config, then scrubs donor secrets (`secret://` rows, MCP OAuth tokens, extension secrets) out of the copy. The sign-in session itself is the one thing that does carry over, see [Security](#security). `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" macOS Keychain item) and writes it into the profile's secret store, round-trip verified. When macOS asks for Keychain permission, click **Allow**: one run, one prompt. Always Allow also works, but it permanently grants the calling binary access to that Keychain item, which is the same pattern infostealers abuse against browser safe storage.
 
 ## "Which key am I on?" in three layers
 
@@ -112,7 +118,7 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `init [--root DIR] [--all]`                    | Discover git repos and register them                            |
 | `add <name> [--path] [--color] [--clone main]` | Create a project profile                                        |
 | `clone <name> [--from main]`                   | Copy sign-in + settings + model config from a donor profile     |
-| `set-key <name> [--key sk-...]`                | Inject the project API key (encrypted, verified)                |
+| `set-key <name>`                               | Inject the project API key (hidden prompt or stdin, encrypted)  |
 | `color <name> [#hex]`                          | Show or set the project title bar color                         |
 | `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)           |
 | `status`                                       | Projects, colors, running windows, key configured               |
@@ -123,7 +129,7 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `wrap [--install]`                             | zsh function so plain `cursor <path>` auto-picks the profile    |
 | `aliases [--install]`                          | Per-project shell aliases (also `ck` shortcut + tab completion) |
 | `completion`                                   | Print zsh tab completion (auto-sourced by `aliases --install`)  |
-| `install-extension`                            | Link the Cursor extension (auto-linked on global npm install)   |
+| `install-extension`                            | Link the Cursor extension (status bar + wrong-window guard)     |
 | `rm <name> [--delete]`                         | Unregister (optionally delete the profile)                      |
 
 `cursor-keys ls` prints registered project names one per line for scripts and tab completion; it is hidden from `--help`.
@@ -153,9 +159,13 @@ cursor-keys config get profilesRoot
 
 ## Security
 
-- Keys go **straight into Cursor's own encrypted store** (`secret://cursorAuth/openAIKey`), encrypted with the same safeStorage mechanism Cursor uses. Never in config files, logs, or stdout.
-- `set-key` reads the "Cursor Safe Storage" Keychain item to encrypt, the same key Cursor itself uses. Nothing leaves your machine.
-- `clone` copies `state.vscdb` locally via SQLite backup. The donor can keep running; the target profile window must be closed.
+Full threat model in [SECURITY.md](SECURITY.md). The short version:
+
+- Keys go **straight into Cursor's own encrypted store** (`secret://cursorAuth/openAIKey`), encrypted with the same safeStorage mechanism Cursor uses. Never in config files, logs, or stdout. `set-key` takes the key from a hidden prompt or stdin, so it never appears in shell history or a process list.
+- `set-key` reads the "Cursor Safe Storage" Keychain item to encrypt, the same key Cursor itself uses. Nothing leaves your machine. Click **Allow** at the prompt; Always Allow permanently ACLs the calling binary to that item.
+- `clone` copies `state.vscdb` locally via SQLite backup, then **scrubs donor secrets from the copy**: all `secret://` rows (the donor's API key, extension secrets) and MCP OAuth tokens are deleted. MCP servers re-auth once per profile.
+- What clone deliberately keeps is your Cursor **sign-in session** (so profiles open signed-in). That means N profiles hold N+1 copies of the session tokens, stored exactly as Cursor stores them. Delete profiles you no longer use: `cursor-keys rm <name> --delete`.
+- Supply chain: zero runtime dependencies, **no install scripts**, and releases are published from GitHub Actions with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) over OIDC trusted publishing (no long-lived npm token).
 
 ## Known limitations
 

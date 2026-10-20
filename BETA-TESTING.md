@@ -45,7 +45,7 @@ cursor-keys init
 cursor-keys clone myproject
 ```
 
-Copies sign-in, settings, theme, and model config from your main Cursor so the new profile opens ready instead of as a fresh install. Can take a couple of minutes (the state DB can be several GB). Your main Cursor can stay open.
+Copies sign-in, settings, theme, and model config from your main Cursor so the new profile opens ready instead of as a fresh install. Donor secrets (API keys, MCP OAuth tokens, extension secrets) are scrubbed from the copy; MCP servers ask you to re-auth once per profile. Can take a couple of minutes (the state DB can be several GB). Your main Cursor can stay open.
 
 ## 5. Inject the API key
 
@@ -54,8 +54,10 @@ cursor-keys set-key myproject
 ```
 
 - Paste the key at the hidden prompt (nothing echoes), press Enter
-- macOS shows a Keychain dialog for "Cursor Safe Storage": click **Always Allow** (asked once)
+- macOS shows a Keychain dialog for "Cursor Safe Storage": click **Allow** (one run, one prompt). Always Allow works too, but it permanently grants the calling binary access to that Keychain item, so Allow is the recommended choice.
 - The write is verified by decrypting it back, so a success message means Cursor can read it
+
+Piping is supported for secret managers: `op read op://vault/item/password | cursor-keys set-key myproject`. There is no inline key flag, on purpose: shell history and process lists are not secret-safe.
 
 The key goes into Cursor's own encrypted store, never into a plaintext file.
 
@@ -66,10 +68,8 @@ cursor-keys wrap --install      # plain `cursor <path>` auto-picks the right pro
 cursor-keys aliases --install   # per-project aliases, `ck` shortcut, and zsh tab completion (e.g. `cursor-keys open <TAB>`)
 cursor-keys sync                # re-copy main Cursor settings into all profiles (also runs on every `open`)
 
-# companion extension: auto-linked into Cursor on global npm install (restart Cursor after).
-# Manual alternatives:
-#   a) Cursor Extensions panel -> search "cursor-keys" -> Install (Open VSX marketplace)
-#   b) cursor-keys install-extension   (links the extension from this clone, dev mode)
+# companion extension (no install scripts run on npm install, link it once yourself):
+cursor-keys install-extension   # or: Cursor Extensions panel -> search "cursor-keys" (Open VSX marketplace)
 ```
 
 Restart your terminal (or `source ~/.zshrc`) after wrap/aliases.

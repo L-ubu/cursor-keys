@@ -1,3 +1,7 @@
 node_modules/
 .DS_Store
 extension/*.vsix
+
+# Local agent memory: internal notes, never for the public repo
+AGENTS.md
+.cursor/hooks/state/
