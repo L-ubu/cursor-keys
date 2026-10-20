@@ -89,6 +89,15 @@ export function symlinkSharedUserFiles(profileDir) {
 export const CLONE_SCRUB_LIKE_PATTERNS = ["secret://%", "mcpOAuth.%"];
 
 /**
+ * Tables wiped from every cloned state DB. Cursor keeps AI agent/chat session
+ * data here (agentKv:blob:* blobs), which dominates DB size (gigabytes on a
+ * well-used donor) and would otherwise carry one project's conversation
+ * history into every other project profile. Everything clone exists for
+ * (sign-in, settings, model config) lives in ItemTable and stays.
+ */
+export const CLONE_PRUNE_TABLES = ["cursorDiskKV", "composerHeaders"];
+
+/**
  * @param {string} donorProfileDir - main Cursor or another profile root (parent of User)
  * @param {string} targetProfileDir
  * @returns {number} how many donor secret rows were scrubbed from the copy
@@ -136,7 +145,38 @@ export function cloneStateDb(donorProfileDir, targetProfileDir) {
     stdio: "ignore",
   });
 
-  return scrubClonedSecrets(dest);
+  const scrubbed = scrubClonedSecrets(dest);
+  pruneStateDbHistory(dest);
+  return scrubbed;
+}
+
+/**
+ * Delete AI chat/agent history tables from a state DB and reclaim the space
+ * with VACUUM. Sign-in, settings, model config and extension state live in
+ * ItemTable and are untouched. Missing tables are skipped, so this is safe
+ * on any Cursor/VS Code state DB.
+ * @param {string} stateDbPath
+ * @returns {{ beforeBytes: number, afterBytes: number }}
+ */
+export function pruneStateDbHistory(stateDbPath) {
+  const beforeBytes = fs.statSync(stateDbPath).size;
+  const tables = execFileSync(
+    "sqlite3",
+    [stateDbPath, "SELECT name FROM sqlite_master WHERE type='table';"],
+    { encoding: "utf8" },
+  )
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const present = CLONE_PRUNE_TABLES.filter((t) => tables.includes(t));
+  if (present.length) {
+    const stmts = present.map((t) => `DELETE FROM "${t}";`).join(" ");
+    execFileSync("sqlite3", [stateDbPath, `${stmts} VACUUM;`], {
+      stdio: "ignore",
+    });
+  }
+  const afterBytes = fs.statSync(stateDbPath).size;
+  return { beforeBytes, afterBytes };
 }
 
 /**
