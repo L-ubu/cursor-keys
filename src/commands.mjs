@@ -49,6 +49,7 @@ import {
   needsFirstRunChecklist,
   printFirstRunChecklist,
   profileIntegrityChecks,
+  pruneStateDbHistory,
   writeProfileSettings,
 } from "./profile.mjs";
 import { setProfileApiKey } from "./keychain.mjs";
@@ -94,6 +95,8 @@ export async function runCommand(argv) {
       return cmdColor(rest);
     case "clone":
       return cmdClone(rest);
+    case "prune":
+      return cmdPrune(rest);
     case "rm":
       return cmdRm(rest);
     case "ls":
@@ -849,14 +852,69 @@ async function cmdClone(args) {
   }
 
   const scrubbed = cloneStateDb(donorRoot, project.profileDir);
+  const dbBytes = fs.statSync(profileStateDb(project.profileDir)).size;
   console.log(ok(`Cloned state from ${from} into ${name}`));
   console.log(
     `${dim}Scrubbed ${scrubbed} donor secret row(s) from the copy (API keys, MCP OAuth, extension secrets); sign-in retained.${reset}`,
   );
   console.log(
-    `${dim}Settings and model config carried over. Now set the project key:${reset}`,
+    `${dim}AI chat/agent history pruned, state DB is ${formatBytes(dbBytes)}. Settings and model config carried over. Now set the project key:${reset}`,
   );
   console.log(`  cursor-keys set-key ${name}`);
+}
+
+function formatBytes(n) {
+  if (n >= 1 << 30) return `${(n / (1 << 30)).toFixed(1)} GB`;
+  if (n >= 1 << 20) return `${(n / (1 << 20)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(n / 1024))} KB`;
+}
+
+async function cmdPrune(args) {
+  const { flags, positional } = parseFlags(args);
+  if (flags.help) {
+    console.log("Usage: cursor-keys prune [name]");
+    console.log(
+      "Deletes AI chat/agent history from profile state DBs and reclaims the",
+    );
+    console.log("space. Sign-in, settings and model config are untouched.");
+    console.log("No name: prune every registered project.");
+    return;
+  }
+  const config = loadConfig();
+  const names = positional[0]
+    ? [positional[0]]
+    : Object.keys(config.projects).sort();
+  if (!names.length) {
+    console.log("No projects registered. Run: cursor-keys init");
+    return;
+  }
+  const running = listRunningCursorProfiles();
+  for (const name of names) {
+    const project = getProject(config, name);
+    if (!project) throw new Error(`Unknown project: ${name}`);
+    if (running.has(path.resolve(project.profileDir))) {
+      console.log(
+        warn(`skip ${name}: profile window is running, close it first`),
+      );
+      continue;
+    }
+    const db = profileStateDb(project.profileDir);
+    if (!fs.existsSync(db)) {
+      console.log(
+        warn(`skip ${name}: no state.vscdb (open Cursor once in this profile)`),
+      );
+      continue;
+    }
+    const { beforeBytes, afterBytes } = pruneStateDbHistory(db);
+    console.log(
+      ok(
+        `Pruned ${name}: ${formatBytes(beforeBytes)} -> ${formatBytes(afterBytes)} (freed ${formatBytes(beforeBytes - afterBytes)})`,
+      ),
+    );
+  }
+  console.log(
+    `${dim}Only AI chat/agent history was removed; sign-in, settings and model config are untouched.${reset}`,
+  );
 }
 
 async function cmdInstallExtension() {

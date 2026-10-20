@@ -25,6 +25,9 @@ function printHelp() {
     "  clone <name> [--from main]  Copy sign-in + settings from a donor profile",
   );
   console.log(
+    "  prune [name]                Delete AI chat history, reclaim profile disk space",
+  );
+  console.log(
     "  set-key <name>              Inject the project API key (encrypted)",
   );
   console.log(
