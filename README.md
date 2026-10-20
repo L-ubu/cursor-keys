@@ -103,7 +103,7 @@ One window, one profile, one key. Each project gets an isolated `--user-data-dir
 
 Settings flow one way, main to profiles: `sync` re-copies your main `settings.json` into every profile and re-applies that profile's title bar color on top. `open` does this automatically before every launch, and open windows hot-reload the file, so tweaks in your main Cursor show up everywhere. Changes made inside a profile window are overwritten on the next sync.
 
-`clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config, then scrubs donor secrets (`secret://` rows, MCP OAuth tokens, extension secrets) out of the copy. The sign-in session itself is the one thing that does carry over, see [Security](#security). `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" macOS Keychain item) and writes it into the profile's secret store, round-trip verified. When macOS asks for Keychain permission, click **Allow**: one run, one prompt. Always Allow also works, but it permanently grants the calling binary access to that Keychain item, which is the same pattern infostealers abuse against browser safe storage.
+`clone` copies your main Cursor state (SQLite backup) so profiles open signed-in with your theme and model config, then scrubs donor secrets (`secret://` rows, MCP OAuth tokens, extension secrets) out of the copy and prunes the AI chat/agent history tables (`cursorDiskKV`, `composerHeaders`). That keeps clones at a few megabytes instead of a full copy of a donor database that can be gigabytes, and stops one project's conversation history from leaking into another project's profile. The sign-in session itself is the one thing that does carry over, see [Security](#security). Already have bulky profiles? `cursor-keys prune [name]` applies the same cleanup to existing ones. `set-key` encrypts your project key with Cursor's own safeStorage (Chromium OSCrypt, key from the "Cursor Safe Storage" macOS Keychain item) and writes it into the profile's secret store, round-trip verified. When macOS asks for Keychain permission, click **Allow**: one run, one prompt. Always Allow also works, but it permanently grants the calling binary access to that Keychain item, which is the same pattern infostealers abuse against browser safe storage.
 
 ## "Which key am I on?" in three layers
 
@@ -118,6 +118,7 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `init [--root DIR] [--all]`                    | Discover git repos and register them                            |
 | `add <name> [--path] [--color] [--clone main]` | Create a project profile                                        |
 | `clone <name> [--from main]`                   | Copy sign-in + settings + model config from a donor profile     |
+| `prune [name]`                                 | Delete AI chat history from profile DBs, reclaim disk space     |
 | `set-key <name>`                               | Inject the project API key (hidden prompt or stdin, encrypted)  |
 | `color <name> [#hex]`                          | Show or set the project title bar color                         |
 | `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)           |
@@ -163,7 +164,7 @@ Full threat model in [SECURITY.md](SECURITY.md). The short version:
 
 - Keys go **straight into Cursor's own encrypted store** (`secret://cursorAuth/openAIKey`), encrypted with the same safeStorage mechanism Cursor uses. Never in config files, logs, or stdout. `set-key` takes the key from a hidden prompt or stdin, so it never appears in shell history or a process list.
 - `set-key` reads the "Cursor Safe Storage" Keychain item to encrypt, the same key Cursor itself uses. Nothing leaves your machine. Click **Allow** at the prompt; Always Allow permanently ACLs the calling binary to that item.
-- `clone` copies `state.vscdb` locally via SQLite backup, then **scrubs donor secrets from the copy**: all `secret://` rows (the donor's API key, extension secrets) and MCP OAuth tokens are deleted. MCP servers re-auth once per profile.
+- `clone` copies `state.vscdb` locally via SQLite backup, then **scrubs donor secrets from the copy**: all `secret://` rows (the donor's API key, extension secrets) and MCP OAuth tokens are deleted. MCP servers re-auth once per profile. The **AI history tables are pruned** too, so no chat or agent session data crosses between project profiles (and clones stay megabytes, not gigabytes).
 - What clone deliberately keeps is your Cursor **sign-in session** (so profiles open signed-in). That means N profiles hold N+1 copies of the session tokens, stored exactly as Cursor stores them. Delete profiles you no longer use: `cursor-keys rm <name> --delete`.
 - Supply chain: zero runtime dependencies, **no install scripts**, and releases are published from GitHub Actions with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) over OIDC trusted publishing (no long-lived npm token).
 

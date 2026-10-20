@@ -4,7 +4,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { buildFirstRunChecklist, cloneStateDb } from "../src/profile.mjs";
+import {
+  buildFirstRunChecklist,
+  cloneStateDb,
+  pruneStateDbHistory,
+} from "../src/profile.mjs";
 import { profileStateDb } from "../src/config.mjs";
 import { hasSqlite3, stateDbKeysLike } from "../src/detect.mjs";
 
@@ -90,6 +94,22 @@ describe("cloneStateDb", () => {
           `INSERT INTO ItemTable (key, value) VALUES ('${k}', '${v}');`,
         ]);
       }
+      execFileSync("sqlite3", [
+        donorDb,
+        "CREATE TABLE cursorDiskKV (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);",
+      ]);
+      execFileSync("sqlite3", [
+        donorDb,
+        "INSERT INTO cursorDiskKV (key, value) VALUES ('agentKv:blob:abc123', 'chat-history-blob');",
+      ]);
+      execFileSync("sqlite3", [
+        donorDb,
+        "CREATE TABLE composerHeaders (key TEXT, value TEXT);",
+      ]);
+      execFileSync("sqlite3", [
+        donorDb,
+        "INSERT INTO composerHeaders (key, value) VALUES ('composer-1', 'header');",
+      ]);
 
       const scrubbed = cloneStateDb(donor, target);
       assert.equal(scrubbed, 3);
@@ -100,6 +120,75 @@ describe("cloneStateDb", () => {
         "cursorAuth/accessToken",
         "cursorAuth/refreshToken",
       ]);
+      const historyRows = execFileSync("sqlite3", [
+        profileStateDb(target),
+        "SELECT (SELECT count(*) FROM cursorDiskKV) + (SELECT count(*) FROM composerHeaders);",
+      ], { encoding: "utf8" }).trim();
+      assert.equal(historyRows, "0");
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("pruneStateDbHistory", () => {
+  it("deletes history tables, keeps ItemTable, shrinks the file", (t) => {
+    if (!hasSqlite3()) {
+      t.skip("sqlite3 not available");
+      return;
+    }
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cursor-keys-prune-"));
+    try {
+      const db = path.join(tmp, "state.vscdb");
+      execFileSync("sqlite3", [
+        db,
+        "CREATE TABLE ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);",
+      ]);
+      execFileSync("sqlite3", [
+        db,
+        "INSERT INTO ItemTable (key, value) VALUES ('cursorAuth/accessToken', 'session-token');",
+      ]);
+      execFileSync("sqlite3", [
+        db,
+        "CREATE TABLE cursorDiskKV (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);",
+      ]);
+      execFileSync("sqlite3", [
+        db,
+        `INSERT INTO cursorDiskKV (key, value) VALUES ('agentKv:blob:abc', zeroblob(1048576));`,
+      ]);
+
+      const { beforeBytes, afterBytes } = pruneStateDbHistory(db);
+      assert.ok(afterBytes < beforeBytes);
+      assert.deepEqual(stateDbKeysLike(db, "%"), ["cursorAuth/accessToken"]);
+      const left = execFileSync("sqlite3", [
+        db,
+        "SELECT count(*) FROM cursorDiskKV;",
+      ], { encoding: "utf8" }).trim();
+      assert.equal(left, "0");
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("is a no-op on DBs without history tables", (t) => {
+    if (!hasSqlite3()) {
+      t.skip("sqlite3 not available");
+      return;
+    }
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cursor-keys-prune-"));
+    try {
+      const db = path.join(tmp, "state.vscdb");
+      execFileSync("sqlite3", [
+        db,
+        "CREATE TABLE ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);",
+      ]);
+      execFileSync("sqlite3", [
+        db,
+        "INSERT INTO ItemTable (key, value) VALUES ('cursorAuth/accessToken', 'session-token');",
+      ]);
+      const { beforeBytes, afterBytes } = pruneStateDbHistory(db);
+      assert.ok(afterBytes <= beforeBytes);
+      assert.deepEqual(stateDbKeysLike(db, "%"), ["cursorAuth/accessToken"]);
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }
