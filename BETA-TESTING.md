@@ -57,7 +57,7 @@ cursor-keys set-key myproject
 - macOS shows a Keychain dialog for "Cursor Safe Storage": click **Allow** (one run, one prompt). Always Allow works too, but it permanently grants the calling binary access to that Keychain item, so Allow is the recommended choice.
 - The write is verified by decrypting it back, so a success message means Cursor can read it
 
-Piping is supported for secret managers: `op read op://vault/item/password | cursor-keys set-key myproject`. Avoid passing the key inline as a flag; it would land in your shell history and process list.
+Piping is supported for secret managers: `op read op://vault/item/password | cursor-keys set-key myproject`. There is no inline key flag, on purpose: shell history and process lists are not secret-safe.
 
 The key goes into Cursor's own encrypted store, never into a plaintext file.
 

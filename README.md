@@ -118,7 +118,7 @@ Settings flow one way, main to profiles: `sync` re-copies your main `settings.js
 | `init [--root DIR] [--all]`                    | Discover git repos and register them                            |
 | `add <name> [--path] [--color] [--clone main]` | Create a project profile                                        |
 | `clone <name> [--from main]`                   | Copy sign-in + settings + model config from a donor profile     |
-| `set-key <name> [--key -]`                     | Inject the project API key (hidden prompt or stdin, encrypted)  |
+| `set-key <name>`                               | Inject the project API key (hidden prompt or stdin, encrypted)  |
 | `color <name> [#hex]`                          | Show or set the project title bar color                         |
 | `open [name]`                                  | Launch Cursor with the profile (auto-detect from cwd)           |
 | `status`                                       | Projects, colors, running windows, key configured               |

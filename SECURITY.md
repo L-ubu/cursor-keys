@@ -7,12 +7,12 @@ judge the blast radius before installing.
 
 ## What cursor-keys can and cannot see
 
-| Surface | What happens |
-| --- | --- |
-| Project API keys | Written only into Cursor's encrypted store (`secret://cursorAuth/openAIKey`) using Cursor's own safeStorage (Chromium OSCrypt). Never written to config files, logs, stdout, or git. |
-| Key input | Hidden terminal prompt, or stdin (`op read op://vault/item/password \| cursor-keys set-key <name>`). Inline `--key` values print a warning: they land in shell history and process lists. |
-| "Cursor Safe Storage" Keychain item | Read at runtime to encrypt/decrypt, the same password Cursor itself uses. It is held in memory for the duration of the command and never persisted. |
-| `~/.config/cursor-keys/config.json` | Project names, repo paths, colors, gateway URL. No secrets, by design. |
+| Surface                             | What happens                                                                                                                                                                              |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project API keys                    | Written only into Cursor's encrypted store (`secret://cursorAuth/openAIKey`) using Cursor's own safeStorage (Chromium OSCrypt). Never written to config files, logs, stdout, or git.      |
+| Key input                           | Hidden terminal prompt, or stdin (`op read op://vault/item/password \| cursor-keys set-key <name>`). There is no inline key flag: shell history and process lists are not secret-safe. |
+| "Cursor Safe Storage" Keychain item | Read at runtime to encrypt/decrypt, the same password Cursor itself uses. It is held in memory for the duration of the command and never persisted.                                       |
+| `~/.config/cursor-keys/config.json` | Project names, repo paths, colors, gateway URL. No secrets, by design.                                                                                                                    |
 
 ## Keychain prompt: click Allow, not Always Allow
 

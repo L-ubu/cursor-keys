@@ -917,8 +917,8 @@ async function cmdColor(args) {
 }
 
 /**
- * Read the API key from stdin (piped input or `--key -`). Only called when
- * stdin is not an interactive TTY or the user explicitly asked for stdin.
+ * Read the API key from piped stdin. Only called when stdin is not an
+ * interactive TTY; interactive runs get the hidden prompt instead.
  */
 function readStdinKey() {
   return fs.readFileSync(0, "utf8").trim();
@@ -944,22 +944,24 @@ function promptHidden(question) {
 async function cmdSetKey(args) {
   const { flags, positional } = parseFlags(args);
   if (flags.help) {
-    console.log("Usage: cursor-keys set-key <name> [--key -]");
+    console.log("Usage: cursor-keys set-key <name>");
     console.log(
       "Writes the key into the profile's encrypted store (Cursor must",
     );
     console.log(
       "not have that profile window open). Hidden prompt when interactive;",
     );
-    console.log(
-      "reads stdin when piped or with `--key -`. Avoid inline --key values:",
-    );
-    console.log("they leak into shell history and process lists.");
+    console.log("reads stdin when piped. No inline key flag exists:");
+    console.log("shell history and process lists are not secret-safe.");
     return;
   }
   const name = positional[0];
-  if (!name)
-    throw new Error("Usage: cursor-keys set-key <name> [--key -]");
+  if (!name) throw new Error("Usage: cursor-keys set-key <name>");
+  if (flags.key !== undefined) {
+    throw new Error(
+      `Inline --key is not accepted: shell history and process lists are not secret-safe. Use the hidden prompt or pipe stdin instead: op read op://vault/item/password | cursor-keys set-key ${name}`,
+    );
+  }
 
   const config = loadConfig();
   const project = getProject(config, name);
@@ -975,19 +977,8 @@ async function cmdSetKey(args) {
     throw new Error(`Close the "${name}" Cursor window first, then retry.`);
   }
 
-  let key = flags.key;
-  if (key === "-") {
-    key = readStdinKey();
-  } else if (key) {
-    console.log(
-      warn(
-        "Inline --key exposes the key in shell history and process lists. Prefer the hidden prompt or stdin:",
-      ),
-    );
-    console.log(
-      `  ${dim}op read op://vault/item/password | cursor-keys set-key ${name}${reset}`,
-    );
-  } else if (!process.stdin.isTTY) {
+  let key;
+  if (!process.stdin.isTTY) {
     key = readStdinKey();
   } else {
     console.log(
