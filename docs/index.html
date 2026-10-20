@@ -588,9 +588,11 @@
             <h3><i>◆</i> Clone your setup</h3>
             <p>
               <code>clone</code> copies sign-in, theme, and model config from
-              your main Cursor, and scrubs donor secrets (API keys, MCP
-              tokens) from the copy. New profiles open ready instead of
-              repeating onboarding.
+              your main Cursor, scrubs donor secrets (API keys, MCP
+              tokens) from the copy, and prunes the AI chat history tables.
+              Clones stay megabytes, not gigabytes, and no conversation
+              history crosses between projects. New profiles open ready
+              instead of repeating onboarding.
             </p>
           </div>
           <div class="card">
@@ -642,6 +644,10 @@
             <tr>
               <td><code>clone &lt;name&gt;</code></td>
               <td>Inherit sign-in, settings, model config from main Cursor</td>
+            </tr>
+            <tr>
+              <td><code>prune [name]</code></td>
+              <td>Delete AI chat history from profile DBs, reclaim disk space</td>
             </tr>
             <tr>
               <td><code>set-key &lt;name&gt;</code></td>

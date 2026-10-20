@@ -34,6 +34,13 @@ settings, so the copy is scrubbed immediately after creation:
   every extension secret, for example MCP client credentials) and all
   `mcpOAuth.*` rows (MCP OAuth tokens). These never propagate into project
   profiles. Consequence: MCP servers ask you to sign in once per profile.
+- **Also deleted from the copy**: the AI history tables (`cursorDiskKV`,
+  `composerHeaders`). Cursor stores agent and chat session data there, which
+  is gigabytes on a well-used donor and would otherwise leak one project's
+  conversation history into every other project profile. Pruning also keeps
+  clones at a few megabytes instead of a full copy of the donor database.
+  Run `cursor-keys prune [name]` to apply the same cleanup to existing
+  profiles.
 - **Kept deliberately**: your Cursor sign-in session (`cursorAuth/*`), theme,
   and model config, so profiles open signed-in and ready.
 
