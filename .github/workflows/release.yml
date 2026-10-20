@@ -17,10 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No registry-url here: setup-node would write an (empty) NODE_AUTH_TOKEN
+      # line into .npmrc, which shadows the OIDC trusted-publishing exchange.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       # Trusted publishing requires npm >= 11.5.1; node 22 bundles npm 10.
       - run: npm install -g npm@latest
